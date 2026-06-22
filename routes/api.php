@@ -1,0 +1,155 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\{
+    AuthController, LombaController, TimelineController,
+    RoadmapController, MitraController, ConfigController,
+    PendaftaranController, NotifikasiController,
+    PengumumanController, StatistikController
+};
+use App\Http\Controllers\Api\Admin\{
+    AdminDashboardController, AdminLombaController,
+    AdminPendaftaranController, AdminPesertaController,
+    AdminTimelineController, AdminRoadmapController,
+    AdminPengumumanController, AdminLaporanController,
+    AdminMitraController, AdminConfigController
+};
+
+// ============================================================
+// AUTH
+// ============================================================
+Route::prefix('auth')->group(function () {
+    Route::post('register',        [AuthController::class, 'register']);
+    Route::post('login',           [AuthController::class, 'login']);
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('reset-password',  [AuthController::class, 'resetPassword']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('me',          [AuthController::class, 'me']);
+        Route::post('logout',     [AuthController::class, 'logout']);
+    });
+});
+
+// ============================================================
+// PUBLIC
+// ============================================================
+Route::get('lomba',              [LombaController::class, 'index']);
+Route::get('lomba/{slug}',       [LombaController::class, 'show']);
+Route::get('lomba/{slug}/faq',   [LombaController::class, 'faq']);
+Route::get('timeline',           [TimelineController::class, 'index']);
+Route::get('roadmap',            [RoadmapController::class, 'index']);
+Route::get('roadmap/{slug}',     [RoadmapController::class, 'show']);
+Route::get('mitra',              [MitraController::class, 'index']);
+Route::get('config/{key}',       [ConfigController::class, 'show']);
+Route::get('statistik/peta',     [StatistikController::class, 'peta']);
+Route::get('galeri',             [RoadmapController::class, 'allGaleriPublic']);
+Route::get('seasons',            [RoadmapController::class, 'seasonsOnly']);
+
+// ============================================================
+// AUTHENTICATED
+// ============================================================
+Route::middleware('auth:sanctum')->group(function () {
+    Route::patch('user/profile', [AuthController::class, 'updateProfile']);
+});
+
+// ============================================================
+// PESERTA
+// ============================================================
+Route::middleware(['auth:sanctum', 'role:peserta'])->group(function () {
+    Route::get('pendaftaran/saya',         [PendaftaranController::class, 'saya']);
+    Route::get('pendaftaran/saya/{id}',    [PendaftaranController::class, 'detail']);
+    Route::post('pendaftaran',             [PendaftaranController::class, 'store']);
+    Route::post('pendaftaran/{id}/revisi', [PendaftaranController::class, 'revisi']);
+
+    Route::get('notifikasi',                 [NotifikasiController::class, 'index']);
+    Route::patch('notifikasi/{id}/baca',     [NotifikasiController::class, 'markRead']);
+    Route::patch('notifikasi/baca-semua',    [NotifikasiController::class, 'markAllRead']);
+
+    Route::get('pengumuman',                 [PengumumanController::class, 'indexPeserta']);
+    Route::get('pengumuman/{id}',            [PengumumanController::class, 'showPeserta']);
+});
+
+// ============================================================
+// ADMIN
+// ============================================================
+Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin'])->group(function () {
+
+    // Dashboard & Statistik
+    Route::get('statistik/overview',    [AdminDashboardController::class, 'overview']);
+    Route::get('statistik/pertumbuhan', [AdminDashboardController::class, 'pertumbuhan']);
+    Route::get('statistik/peta',        [AdminDashboardController::class, 'peta']);
+
+    // Lomba
+    Route::get('lomba',                 [AdminLombaController::class, 'index']);
+    Route::post('lomba',                [AdminLombaController::class, 'store']);
+    Route::get('lomba/{id}',            [AdminLombaController::class, 'show']);
+    Route::post('lomba/{id}',           [AdminLombaController::class, 'update']); // POST karena multipart
+    Route::delete('lomba/{id}',         [AdminLombaController::class, 'destroy']);
+    Route::patch('lomba/{id}/status',   [AdminLombaController::class, 'toggleStatus']);
+
+    // FAQ & Timeline per Lomba (nested)
+    Route::post('lomba/{id}/faq',            [AdminLombaController::class, 'storeFaq']);
+    Route::put('lomba/{id}/faq/{faqId}',     [AdminLombaController::class, 'updateFaq']);
+    Route::delete('lomba/{id}/faq/{faqId}',  [AdminLombaController::class, 'destroyFaq']);
+    Route::post('lomba/{id}/timeline',             [AdminLombaController::class, 'storeTimeline']);
+    Route::put('lomba/{id}/timeline/{tlId}',       [AdminLombaController::class, 'updateTimeline']);
+    Route::delete('lomba/{id}/timeline/{tlId}',    [AdminLombaController::class, 'destroyTimeline']);
+
+    // Pendaftaran
+    Route::get('pendaftaran',                       [AdminPendaftaranController::class, 'index']);
+    Route::get('pendaftaran/{id}',                  [AdminPendaftaranController::class, 'show']);
+    Route::put('pendaftaran/{id}/verifikasi',        [AdminPendaftaranController::class, 'verifikasi']);
+
+    // Peserta
+    Route::get('peserta',               [AdminPesertaController::class, 'index']);
+    Route::get('peserta/export',        [AdminPesertaController::class, 'export']);
+
+    // Timeline Global
+    Route::get('timeline',              [AdminTimelineController::class, 'index']);
+    Route::post('timeline',             [AdminTimelineController::class, 'store']);
+    // update timeline needs to support PUT
+    Route::put('timeline/{id}',         [AdminTimelineController::class, 'update']);
+    Route::delete('timeline/{id}',      [AdminTimelineController::class, 'destroy']);
+    Route::patch('timeline/{id}/aktif', [AdminTimelineController::class, 'setAktif']);
+    Route::post('timeline/reorder',     [AdminTimelineController::class, 'reorder']);
+
+    // Season / Roadmap
+    Route::get('roadmap',               [AdminRoadmapController::class, 'index']);
+    Route::post('roadmap',              [AdminRoadmapController::class, 'store']);
+    Route::get('roadmap/{id}',          [AdminRoadmapController::class, 'show']);
+    Route::post('roadmap/{id}',         [AdminRoadmapController::class, 'update']); // POST karena multipart
+    Route::delete('roadmap/{id}',       [AdminRoadmapController::class, 'destroy']);
+    Route::post('roadmap/{id}/galeri',              [AdminRoadmapController::class, 'addGaleri']);
+    Route::delete('roadmap/{id}/galeri/{galeriId}', [AdminRoadmapController::class, 'deleteGaleri']);
+    Route::post('roadmap/{id}/pemenang',            [AdminRoadmapController::class, 'storePemenang']);
+    Route::put('roadmap/{id}/pemenang/{pId}',       [AdminRoadmapController::class, 'updatePemenang']);
+    Route::delete('roadmap/{id}/pemenang/{pId}',    [AdminRoadmapController::class, 'destroyPemenang']);
+
+    // Pengumuman
+    Route::get('pengumuman',            [AdminPengumumanController::class, 'index']);
+    Route::post('pengumuman',           [AdminPengumumanController::class, 'store']);
+    Route::get('pengumuman/{id}',       [AdminPengumumanController::class, 'show']);
+    Route::put('pengumuman/{id}',       [AdminPengumumanController::class, 'update']);
+    Route::delete('pengumuman/{id}',    [AdminPengumumanController::class, 'destroy']);
+    Route::post('pengumuman/{id}/kirim-email', [AdminPengumumanController::class, 'kirimEmail']);
+
+    // Galeri Global
+    Route::get('galeri',                [AdminRoadmapController::class, 'allGaleri']);
+    Route::post('galeri',               [AdminRoadmapController::class, 'addGaleriFromGlobal']);
+    Route::delete('galeri/{id}',        [AdminRoadmapController::class, 'deleteGaleriGlobal']);
+    Route::get('seasons',               [AdminRoadmapController::class, 'index']);
+
+    // Mitra
+    Route::get('mitra',                 [AdminMitraController::class, 'index']);
+    Route::post('mitra',                [AdminMitraController::class, 'store']);
+    Route::get('mitra/{id}',            [AdminMitraController::class, 'show']);
+    Route::post('mitra/{id}',           [AdminMitraController::class, 'update']); // POST karena logo upload
+    Route::delete('mitra/{id}',         [AdminMitraController::class, 'destroy']);
+
+    // Config
+    Route::get('config',                [AdminConfigController::class, 'index']);
+    Route::put('config/{key}',          [AdminConfigController::class, 'update']);
+
+    // Laporan
+    Route::get('laporan/ringkasan',     [AdminLaporanController::class, 'ringkasan']);
+});
