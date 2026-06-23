@@ -22,4 +22,15 @@ class PemenangSeason extends Model
     {
         return $this->belongsTo(Season::class);
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::saved(function ($model) {
+            cache()->forget('roadmap_seasons');
+        });
+        static::deleted(function ($model) {
+            cache()->forget('roadmap_seasons');
+        });
+    }
 }

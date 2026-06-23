@@ -253,38 +253,8 @@ export default function LandingPage() {
       // 3. Scroll Parallax for Hero Logos
       const heroSec = document.querySelector('.hero-section');
       if (heroSec) {
-        gsap.to('.parallax-logo-1', {
-          yPercent: 30,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: heroSec,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: 0
-          }
-        });
         gsap.to('.parallax-logo-2', {
           yPercent: 40,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: heroSec,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: 0
-          }
-        });
-        gsap.to('.parallax-logo-3', {
-          yPercent: 80,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: heroSec,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: 0
-          }
-        });
-        gsap.to('.parallax-logo-4', {
-          yPercent: 60,
           ease: 'none',
           scrollTrigger: {
             trigger: heroSec,
@@ -319,27 +289,25 @@ export default function LandingPage() {
       {/* ── NEW HERO SECTION (PARALLAX + TEXT ROTATE) ── */}
       <section className="hero-section w-full min-h-screen flex flex-col items-center justify-center relative pt-24 pb-16 px-6 sm:px-12 md:px-20 z-10 overflow-hidden md:overflow-visible">
         
+        {/* Subtle repeating mascot background pattern */}
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-[0.05] z-0"
+          style={{
+            backgroundImage: "url('/images/logo/maskot.png'), url('/images/logo/maskot.png')",
+            backgroundRepeat: 'repeat',
+            backgroundSize: '160px 160px',
+            backgroundPosition: '0 0, 80px 80px',
+          }}
+        />
+        
         {/* Mouse Follow Floating Parallax Logos */}
         <Floating className="absolute inset-0 h-full w-full pointer-events-none hidden md:block z-0 overflow-hidden" sensitivity={1.2}>
           
-          <FloatingElement depth={0.5} className="absolute top-[12%] left-[2%] md:top-[20%] md:left-[3%]">
-            <div className="parallax-logo-1">
-              <motion.img
-                src="/images/logo/logo3.png"
-                alt="OSCAR 3.0 Logo"
-                className="w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-48 lg:h-48 object-contain hover:scale-105 duration-200 cursor-pointer transition-transform -rotate-[3deg] drop-shadow-[0_0_20px_rgba(112,196,146,0.15)]"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-              />
-            </div>
-          </FloatingElement>
-
           <FloatingElement depth={1.0} className="absolute top-[0%] left-[6%] md:top-[4%] md:left-[9%]">
             <div className="parallax-logo-2">
               <motion.img
-                src="/images/logo/logo3.png"
-                alt="OSCAR 3.0 Logo"
+                src="/images/logo/maskot3.png"
+                alt="OSCAR 3.0 Mascot"
                 className="w-36 h-36 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 object-contain hover:scale-105 duration-200 cursor-pointer transition-transform -rotate-12 drop-shadow-[0_0_25px_rgba(112,196,146,0.2)]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -348,36 +316,10 @@ export default function LandingPage() {
             </div>
           </FloatingElement>
 
-          <FloatingElement depth={2.0} className="absolute top-[80%] left-[2%] md:top-[70%] md:left-[5%]">
-            <div className="parallax-logo-3">
-              <motion.img
-                src="/images/logo/logo3.png"
-                alt="OSCAR 3.0 Logo"
-                className="w-40 h-40 sm:w-52 sm:h-52 md:w-60 md:h-60 lg:w-72 lg:h-72 object-contain -rotate-[4deg] hover:scale-105 duration-200 cursor-pointer transition-transform drop-shadow-[0_0_30px_rgba(112,196,146,0.25)]"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.9 }}
-              />
-            </div>
-          </FloatingElement>
-
-          <FloatingElement depth={1.5} className="absolute top-[2%] left-[82%] md:top-[4%] md:left-[76%]">
-            <div className="parallax-logo-4">
-              <motion.img
-                src="/images/logo/maskot.png"
-                alt="OSCAR 3.0 Mascot"
-                className="w-40 h-40 sm:w-52 sm:h-52 md:w-60 md:h-60 lg:w-72 lg:h-72 object-contain hover:scale-105 duration-200 cursor-pointer transition-transform drop-shadow-[0_0_30px_rgba(112,196,146,0.25)] rotate-[6deg]"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.1 }}
-              />
-            </div>
-          </FloatingElement>
-
           <FloatingElement depth={2.5} className="absolute top-[75%] left-[78%] md:top-[65%] md:left-[80%]">
             <div className="parallax-logo-5">
               <motion.img
-                src="/images/logo/maskot.png"
+                src="/images/logo/maskot2.png"
                 alt="OSCAR 3.0 Mascot"
                 className="w-48 h-48 sm:w-60 sm:h-60 md:w-72 md:h-72 lg:w-80 lg:h-80 object-contain hover:scale-105 duration-200 cursor-pointer transition-transform drop-shadow-[0_0_35px_rgba(112,196,146,0.3)] rotate-[19deg]"
                 initial={{ opacity: 0 }}
@@ -445,7 +387,7 @@ export default function LandingPage() {
           <div className="flex flex-wrap justify-center gap-3 mt-6">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm text-sm font-semibold text-white/80 hover:border-[#70C492]/40 transition-colors">
               <span className="w-1.5 h-1.5 rounded-full bg-[#70C492] shadow-[0_0_8px_#70C492]" />
-              Hadiah Puluhan Juta
+              Hadiah Menarik
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm text-sm font-semibold text-white/80 hover:border-[#70C492]/40 transition-colors">
               <span className="w-1.5 h-1.5 rounded-full bg-[#70C492] shadow-[0_0_8px_#70C492]" />
@@ -453,7 +395,7 @@ export default function LandingPage() {
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm text-sm font-semibold text-white/80 hover:border-[#70C492]/40 transition-colors">
               <span className="w-1.5 h-1.5 rounded-full bg-[#70C492] shadow-[0_0_8px_#70C492]" />
-              SMA/MA/SMK/D3/D4/S1 Sederajat
+              MAHASISWA STT NF / SMA / SMK / Sederajat
             </div>
           </div>
 

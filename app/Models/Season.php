@@ -66,6 +66,13 @@ class Season extends Model
             if (empty($model->slug)) {
                 $model->slug = Str::slug($model->nama);
             }
+            cache()->forget('roadmap_seasons');
+        });
+        static::saved(function ($model) {
+            cache()->forget('roadmap_seasons');
+        });
+        static::deleted(function ($model) {
+            cache()->forget('roadmap_seasons');
         });
     }
 }

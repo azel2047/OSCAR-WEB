@@ -44,4 +44,15 @@ class GaleriSeason extends Model
         $bucket = env('SUPABASE_BUCKET_GALERI', 'galeri-season');
         return "{$supabaseUrl}/storage/v1/object/public/{$bucket}/{$this->path}";
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::saved(function ($model) {
+            cache()->forget('roadmap_seasons');
+        });
+        static::deleted(function ($model) {
+            cache()->forget('roadmap_seasons');
+        });
+    }
 }

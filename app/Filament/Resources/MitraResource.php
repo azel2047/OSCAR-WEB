@@ -45,6 +45,17 @@ class MitraResource extends Resource
                                     ->disk('public')
                                     ->directory('mitras')
                                     ->dehydrated(false)
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if ($state) {
+                                            $file = is_array($state) ? array_values($state)[0] : $state;
+                                            if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                                                $set('logo_path', $file->getClientOriginalName());
+                                            }
+                                        } else {
+                                            $set('logo_path', null);
+                                        }
+                                    })
                                     ->formatStateUsing(fn ($record) => ($record && $record->logo_path && !str_starts_with($record->logo_path, 'http')) ? $record->logo_path : null),
                                 Forms\Components\TextInput::make('logo_path')
                                     ->label('Logo URL / Path')

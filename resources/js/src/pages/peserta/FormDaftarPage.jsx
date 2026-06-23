@@ -438,6 +438,26 @@ export default function FormDaftarPage() {
               </div>
             )}
 
+            {/* Info Rekening Pembayaran */}
+            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#00ffc8]/10 border border-[#00ffc8]/20 flex items-center justify-center text-[#00ffc8] flex-shrink-0">
+                  <Info size={18} />
+                </div>
+                <div>
+                  <h4 className="text-white text-sm font-bold">Informasi Pembayaran</h4>
+                  <p className="text-[#8B9A7A] text-[12px] mt-0.5 leading-relaxed">
+                    Silakan transfer biaya pendaftaran ke rekening SeaBank berikut:
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col items-start sm:items-end justify-center px-4 py-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] sm:min-w-[240px]">
+                <span className="text-[10px] font-mono font-bold tracking-widest text-[#8B9A7A] uppercase">SeaBank</span>
+                <span className="text-white text-sm font-mono font-black tracking-wider mt-0.5">901321217198</span>
+                <span className="text-[11px] font-medium text-[#9dd5b8] mt-0.5">a.n. Shifa Nur Fauziyyah</span>
+              </div>
+            </div>
+
             {/* Dotted Grid Cards */}
             <div className="grid sm:grid-cols-2 gap-4">
               

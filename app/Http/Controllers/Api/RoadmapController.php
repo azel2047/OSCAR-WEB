@@ -14,7 +14,9 @@ class RoadmapController extends Controller
 
     public function index()
     {
-        $seasons = Season::with(['galeri', 'pemenang'])->orderBy('urutan')->get();
+        $seasons = cache()->remember('roadmap_seasons', now()->addDay(), function () {
+            return Season::with(['galeri', 'pemenang'])->orderBy('urutan')->get();
+        });
         return $this->success(SeasonResource::collection($seasons));
     }
 

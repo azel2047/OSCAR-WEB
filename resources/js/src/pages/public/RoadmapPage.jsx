@@ -34,6 +34,7 @@ export default function RoadmapPage() {
       tag: s.nama,
       title: s.tema,
       desc: s.deskripsi,
+      foto_utama_url: s.foto_utama_url,
       buttonText: isCurrent ? '' : `Jelajahi ${s.nama} ↗`,
       link: isCurrent ? '#' : (s.slug === 'oscar-1-0' ? '/archive/oscar-1' : '/archive/oscar-2'),
     };
@@ -189,45 +190,55 @@ export default function RoadmapPage() {
 
             {/* Visual Part - Premium Illustrative Tech Cards */}
             <div className="step-visual w-full lg:w-1/2 flex items-center justify-center">
-              <div className="w-full max-w-[420px] aspect-[16/10] rounded-2xl border border-dashed border-[#70C492]/20 bg-[#18412E]/20 flex flex-col items-center justify-center p-6 relative overflow-hidden group hover:border-[#70C492]/40 hover:bg-[#70C492]/[0.02] transition-all duration-300">
+              <div className="w-full max-w-[420px] aspect-[16/10] rounded-2xl border border-dashed border-[#70C492]/20 bg-[#18412E]/20 flex flex-col items-center justify-center relative overflow-hidden group hover:border-[#70C492]/40 hover:bg-[#70C492]/[0.02] transition-all duration-300">
                 <div className="absolute inset-0 bg-[#70C492]/[0.01] blur-2xl pointer-events-none" />
                 
-                {m.tag === 'OSCAR 1.0' && (
-                  <div className="flex flex-col gap-3 items-center z-10 text-center">
-                    <div className="w-14 h-14 rounded-full bg-[#70C492]/10 border border-[#70C492]/20 flex items-center justify-center text-[#70C492] mb-1 group-hover:scale-110 transition-transform duration-300">
-                      <Sparkles size={22} className="animate-pulse" />
-                    </div>
-                    <span className="font-cyber font-black text-white text-base tracking-widest uppercase">OSCAR 1.0</span>
-                    <div className="font-mono text-[12px] text-white/40 flex flex-col gap-0.5 items-center mt-1">
-                      <span className="text-[#70C492] font-semibold">SOARING BEYOND LIMITS</span>
-                      <span>FOTO</span>
-                    </div>
-                  </div>
-                )}
+                {m.foto_utama_url ? (
+                  <img 
+                    src={m.foto_utama_url} 
+                    alt={m.title} 
+                    className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="p-6 flex flex-col items-center justify-center">
+                    {m.tag === 'OSCAR 1.0' && (
+                      <div className="flex flex-col gap-3 items-center z-10 text-center">
+                        <div className="w-14 h-14 rounded-full bg-[#70C492]/10 border border-[#70C492]/20 flex items-center justify-center text-[#70C492] mb-1 group-hover:scale-110 transition-transform duration-300">
+                          <Sparkles size={22} className="animate-pulse" />
+                        </div>
+                        <span className="font-cyber font-black text-white text-base tracking-widest uppercase">OSCAR 1.0</span>
+                        <div className="font-mono text-[12px] text-white/40 flex flex-col gap-0.5 items-center mt-1">
+                          <span className="text-[#70C492] font-semibold">SOARING BEYOND LIMITS</span>
+                          <span>FOTO</span>
+                        </div>
+                      </div>
+                    )}
 
-                {m.tag === 'OSCAR 2.0' && (
-                  <div className="flex flex-col gap-3 items-center z-10 text-center">
-                    <div className="w-14 h-14 rounded-full bg-[#70C492]/10 border border-[#70C492]/20 flex items-center justify-center text-[#70C492] mb-1 group-hover:scale-110 transition-transform duration-300">
-                      <Calendar size={22} className="animate-pulse" />
-                    </div>
-                    <span className="font-cyber font-black text-white text-base tracking-widest uppercase">OSCAR 2.0</span>
-                    <div className="font-mono text-[12px] text-white/40 flex flex-col gap-0.5 items-center mt-1">
-                      <span className="text-[#70C492] font-semibold">HORIZON_EXPANSION</span>
-                      <span>FOTO</span>
-                    </div>
-                  </div>
-                )}
+                    {m.tag === 'OSCAR 2.0' && (
+                      <div className="flex flex-col gap-3 items-center z-10 text-center">
+                        <div className="w-14 h-14 rounded-full bg-[#70C492]/10 border border-[#70C492]/20 flex items-center justify-center text-[#70C492] mb-1 group-hover:scale-110 transition-transform duration-300">
+                          <Calendar size={22} className="animate-pulse" />
+                        </div>
+                        <span className="font-cyber font-black text-white text-base tracking-widest uppercase">OSCAR 2.0</span>
+                        <div className="font-mono text-[12px] text-white/40 flex flex-col gap-0.5 items-center mt-1">
+                          <span className="text-[#70C492] font-semibold">HORIZON_EXPANSION</span>
+                          <span>FOTO</span>
+                        </div>
+                      </div>
+                    )}
 
-                {m.tag === 'OSCAR 3.0' && (
-                  <div className="flex flex-col gap-3 items-center z-10 text-center">
-                    <div className="w-14 h-14 rounded-full bg-[#70C492]/15 border border-[#70C492]/40 flex items-center justify-center text-[#70C492] mb-1 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_15px_rgba(112,196,146,0.25)]">
-                      <Sparkles size={22} className="animate-spin-slow" />
-                    </div>
-                    <span className="font-cyber font-black text-[#70C492] text-base tracking-widest uppercase" style={{ textShadow: '0 0 15px rgba(112,196,146,0.2)' }}>OSCAR 3.0</span>
-                    <div className="font-mono text-[12px] text-white/50 flex flex-col gap-0.5 items-center mt-1">
-                      <span className="text-[#70C492] font-semibold">RAINFOREST</span>
-                      <span>FOTO</span>
-                    </div>
+                    {m.tag === 'OSCAR 3.0' && (
+                      <div className="flex flex-col gap-3 items-center z-10 text-center">
+                        <div className="w-14 h-14 rounded-full bg-[#70C492]/15 border border-[#70C492]/40 flex items-center justify-center text-[#70C492] mb-1 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_15px_rgba(112,196,146,0.25)]">
+                          <Sparkles size={22} className="animate-spin-slow" />
+                        </div>
+                        <span className="font-cyber font-black text-[#70C492] text-base tracking-widest uppercase" style={{ textShadow: '0 0 15px rgba(112,196,146,0.2)' }}>OSCAR 3.0</span>
+                        <div className="font-mono text-[12px] text-white/50 flex flex-col gap-0.5 items-center mt-1">
+                          <span className="text-[#70C492] font-semibold">RAINFOREST</span>
+                          <span>FOTO</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 

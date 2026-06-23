@@ -8,7 +8,7 @@ import api from '@/api/axios';
 
 export default function Oscar1Page() {
   const containerRef = useRef(null);
-  const { data: rawSeasonData, request: fetchSeason } = useApi();
+  const { data: rawSeasonData, request: fetchSeason, isLoading } = useApi();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -72,6 +72,14 @@ export default function Oscar1Page() {
       });
     }
   }, []);
+
+  if (isLoading || !rawSeasonData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#112C1E] text-white">
+        <div className="w-10 h-10 border-2 border-[#70C492] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div 

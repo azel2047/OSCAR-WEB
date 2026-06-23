@@ -86,6 +86,17 @@ class SeasonResource extends Resource
                                         ->disk('public')
                                         ->directory('seasons')
                                         ->dehydrated(false)
+                                        ->reactive()
+                                        ->afterStateUpdated(function ($state, callable $set) {
+                                            if ($state) {
+                                                $file = is_array($state) ? array_values($state)[0] : $state;
+                                                if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                                                    $set('foto_utama', $file->getClientOriginalName());
+                                                }
+                                            } else {
+                                                $set('foto_utama', null);
+                                            }
+                                        })
                                         ->formatStateUsing(fn ($record) => ($record && $record->foto_utama && !str_starts_with($record->foto_utama, 'http')) ? $record->foto_utama : null),
                                     Forms\Components\TextInput::make('foto_utama')
                                         ->label('Path Foto Utama / URL')
@@ -143,8 +154,8 @@ class SeasonResource extends Resource
                                 foreach ($state as $file) {
                                     $maxUrutan++;
                                     $currentGaleri[] = [
-                                        'path_upload' => $file,
-                                        'path' => $file,
+                                        'path_upload' => [$file],
+                                        'path' => $file->getClientOriginalName(),
                                         'caption' => null,
                                         'urutan' => $maxUrutan,
                                     ];
@@ -162,6 +173,17 @@ class SeasonResource extends Resource
                                     ->disk('public')
                                     ->directory('galeri')
                                     ->dehydrated(false)
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if ($state) {
+                                            $file = is_array($state) ? array_values($state)[0] : $state;
+                                            if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                                                $set('path', $file->getClientOriginalName());
+                                            }
+                                        } else {
+                                            $set('path', null);
+                                        }
+                                    })
                                     ->formatStateUsing(fn ($record) => ($record && $record->path && !str_starts_with($record->path, 'http')) ? $record->path : null),
                                 Forms\Components\TextInput::make('path')
                                     ->label('Path Gambar / URL')

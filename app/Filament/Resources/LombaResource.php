@@ -130,6 +130,17 @@ class LombaResource extends Resource
                                             ->disk('public')
                                             ->directory('booklets')
                                             ->dehydrated(false)
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                if ($state) {
+                                                    $file = is_array($state) ? array_values($state)[0] : $state;
+                                                    if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                                                        $set('booklet_path', $file->getClientOriginalName());
+                                                    }
+                                                } else {
+                                                    $set('booklet_path', null);
+                                                }
+                                            })
                                             ->formatStateUsing(fn ($record) => ($record && $record->booklet_path && !str_starts_with($record->booklet_path, 'http')) ? $record->booklet_path : null),
                                         Forms\Components\TextInput::make('booklet_path')
                                             ->label('Atau Tautan (URL) Booklet')
@@ -149,6 +160,17 @@ class LombaResource extends Resource
                                             ->disk('public')
                                             ->directory('banners')
                                             ->dehydrated(false)
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                if ($state) {
+                                                    $file = is_array($state) ? array_values($state)[0] : $state;
+                                                    if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                                                        $set('banner_path', $file->getClientOriginalName());
+                                                    }
+                                                } else {
+                                                    $set('banner_path', null);
+                                                }
+                                            })
                                             ->formatStateUsing(fn ($record) => ($record && $record->banner_path && !str_starts_with($record->banner_path, 'http')) ? $record->banner_path : null),
                                         Forms\Components\TextInput::make('banner_path')
                                             ->label('Atau Tautan (URL) Banner')

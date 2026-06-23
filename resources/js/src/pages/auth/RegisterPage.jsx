@@ -116,9 +116,11 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="animate-in text-center mb-10">
           <Link to="/" className="inline-flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-xl border border-[#70C492]/40 bg-[#70C492]/10 flex items-center justify-center transition-all group-hover:scale-105 shadow-[0_0_15px_rgba(112,196,146,0.15)]">
-              <span className="font-display font-bold text-[#70C492]">OC</span>
-            </div>
+            <img 
+              src="/images/logo/logo3.png" 
+              alt="OSCAR Logo" 
+              className="w-11 h-11 object-contain transition-all group-hover:scale-105 filter drop-shadow-[0_0_10px_rgba(112,196,146,0.3)]" 
+            />
             <div className="text-left">
               <div className="font-display font-bold text-white leading-none">OSCAR 3.0</div>
               <div className="font-mono text-[#70C492] text-[12px] tracking-widest uppercase font-bold mt-1">Season Rainforest</div>
