@@ -325,8 +325,58 @@ class PendaftaranResource extends Resource
                             ->send();
                     }),
             ])
+            ->headerActions([
+                Actions\ActionGroup::make([
+                    Actions\Action::make('export_csv')
+                        ->label('Ekspor Semua ke CSV')
+                        ->icon('heroicon-o-document-text')
+                        ->action(function (Tables\Contracts\HasTable $livewire) {
+                            $records = $livewire->getFilteredTableQuery()->with(['user', 'lomba'])->get();
+                            return static::exportCsv($records);
+                        }),
+                    Actions\Action::make('export_excel')
+                        ->label('Ekspor Semua ke Excel')
+                        ->icon('heroicon-o-table-cells')
+                        ->action(function (Tables\Contracts\HasTable $livewire) {
+                            $records = $livewire->getFilteredTableQuery()->with(['user', 'lomba'])->get();
+                            return static::exportExcel($records);
+                        }),
+                    Actions\Action::make('export_pdf')
+                        ->label('Ekspor Semua ke PDF')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->action(function (Tables\Contracts\HasTable $livewire) {
+                            $records = $livewire->getFilteredTableQuery()->with(['user', 'lomba'])->get();
+                            return static::exportPdf($records);
+                        }),
+                ])
+                ->label('Ekspor Data')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+            ])
             ->bulkActions([
-                // No bulk actions for registrations
+                Actions\BulkActionGroup::make([
+                    Actions\BulkAction::make('export_csv_bulk')
+                        ->label('Ekspor ke CSV (Pilihan)')
+                        ->icon('heroicon-o-document-text')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            $records->load(['user', 'lomba']);
+                            return static::exportCsv($records);
+                        }),
+                    Actions\BulkAction::make('export_excel_bulk')
+                        ->label('Ekspor ke Excel (Pilihan)')
+                        ->icon('heroicon-o-table-cells')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            $records->load(['user', 'lomba']);
+                            return static::exportExcel($records);
+                        }),
+                    Actions\BulkAction::make('export_pdf_bulk')
+                        ->label('Ekspor ke PDF (Pilihan)')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            $records->load(['user', 'lomba']);
+                            return static::exportPdf($records);
+                        }),
+                ]),
             ]);
     }
 
@@ -346,5 +396,64 @@ class PendaftaranResource extends Resource
             'index' => Pages\ListPendaftarans::route('/'),
             'view' => Pages\ViewPendaftaran::route('/{record}'),
         ];
+    }
+
+    public static function exportCsv($records)
+    {
+        return response()->streamDownload(function () use ($records) {
+            $file = fopen('php://output', 'w');
+            fputs($file, "\xEF\xBB\xBF"); // UTF-8 BOM
+            fputcsv($file, ['No. Pendaftaran', 'Nama Pendaftar', 'Email', 'No HP', 'Tingkat', 'Cabang Lomba', 'Status', 'Tanggal Daftar']);
+            foreach ($records as $record) {
+                fputcsv($file, [
+                    $record->nomor,
+                    $record->user?->nama ?? '-',
+                    $record->user?->email ?? '-',
+                    $record->user?->no_hp ?? '-',
+                    $record->user?->kategori ?? '-',
+                    $record->lomba?->nama ?? '-',
+                    $record->status,
+                    $record->created_at?->format('d M Y H:i') ?? '-',
+                ]);
+            }
+            fclose($file);
+        }, 'pendaftaran_' . now()->format('Ymd_His') . '.csv');
+    }
+
+    public static function exportExcel($records)
+    {
+        return response()->streamDownload(function () use ($records) {
+            echo '<html><head><meta charset="utf-8"><style>th{background-color:#112C1E;color:white;font-weight:bold;} td,th{border:1px solid #ddd;padding:6px;}</style></head><body>';
+            echo '<table border="1">';
+            echo '<tr>';
+            echo '<th>No. Pendaftaran</th><th>Nama Pendaftar</th><th>Email</th><th>No HP</th><th>Tingkat</th><th>Cabang Lomba</th><th>Status</th><th>Tanggal Daftar</th>';
+            echo '</tr>';
+            foreach ($records as $record) {
+                echo '<tr>';
+                echo '<td>' . e($record->nomor) . '</td>';
+                echo '<td>' . e($record->user?->nama ?? '-') . '</td>';
+                echo '<td>' . e($record->user?->email ?? '-') . '</td>';
+                echo '<td>' . e($record->user?->no_hp ?? '-') . '</td>';
+                echo '<td>' . e($record->user?->kategori ?? '-') . '</td>';
+                echo '<td>' . e($record->lomba?->nama ?? '-') . '</td>';
+                echo '<td>' . e($record->status) . '</td>';
+                echo '<td>' . e($record->created_at?->format('d M Y H:i') ?? '-') . '</td>';
+                echo '</tr>';
+            }
+            echo '</table></body></html>';
+        }, 'pendaftaran_' . now()->format('Ymd_His') . '.xls');
+    }
+
+    public static function exportPdf($records)
+    {
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.pendaftaran', [
+            'records' => $records,
+            'title' => 'Laporan Pendaftaran Peserta OSCAR 3.0',
+            'date' => now()->format('d M Y H:i'),
+        ]);
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, 'pendaftaran_' . now()->format('Ymd_His') . '.pdf');
     }
 }
