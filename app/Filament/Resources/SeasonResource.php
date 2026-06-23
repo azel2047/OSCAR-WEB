@@ -129,6 +129,7 @@ class SeasonResource extends Resource
                             ->multiple()
                             ->dehydrated(false)
                             ->reactive()
+                            ->default([])
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                 if (!is_array($state)) {
                                     return;
@@ -150,7 +151,7 @@ class SeasonResource extends Resource
                                 }
 
                                 $set('galeri', $currentGaleri);
-                                $set('bulk_upload', null);
+                                $set('bulk_upload', []);
                             }),
 
                         Forms\Components\Repeater::make('galeri')
