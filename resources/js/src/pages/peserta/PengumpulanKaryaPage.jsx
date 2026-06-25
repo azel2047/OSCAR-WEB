@@ -141,8 +141,8 @@ export default function PengumpulanKaryaPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 500 * 1024) {
-      setErrorMsg('Ukuran file tidak boleh melebihi 500 KB.');
+    if (file.size > 2 * 1024 * 1024) {
+      setErrorMsg('Ukuran file tidak boleh melebihi 2 MB.');
       e.target.value = '';
       setBuktiInstagram(null);
       setBuktiInstagramPreview(pengumpulan?.file_screenshot || '');
@@ -637,7 +637,7 @@ export default function PengumpulanKaryaPage() {
                       <div className="flex flex-col items-center justify-center gap-2">
                         <Upload size={24} className="text-[#00ffc8] animate-bounce" />
                         <span className="text-white text-xs font-semibold">Pilih Berkas Screenshot</span>
-                        <span className="text-[10px] text-[#8B9A7A]">Format JPG/PNG, maks 500 KB</span>
+                        <span className="text-[10px] text-[#8B9A7A]">Format JPG/PNG, maks 2 MB</span>
                       </div>
                       <input
                         type="file"

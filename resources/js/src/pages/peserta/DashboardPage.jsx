@@ -176,8 +176,8 @@ export default function PesertaDashboardPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 500 * 1024) {
-      setKaryaError('Ukuran file tidak boleh melebihi 500 KB.');
+    if (file.size > 2 * 1024 * 1024) {
+      setKaryaError('Ukuran file tidak boleh melebihi 2 MB.');
       e.target.value = '';
       setBuktiInstagram(null);
       setBuktiInstagramPreview(pengumpulan?.file_screenshot || '');
@@ -859,7 +859,7 @@ export default function PesertaDashboardPage() {
                               <div className="flex flex-col items-center justify-center gap-1.5 text-center">
                                 <Upload size={20} className="text-[#00ffc8] animate-pulse" />
                                 <span className="text-white text-[11px] font-semibold">Pilih Berkas Screenshot</span>
-                                <span className="text-[9px] text-[#8B9A7A]">Format JPG/PNG, maks 500 KB</span>
+                                <span className="text-[9px] text-[#8B9A7A]">Format JPG/PNG, maks 2 MB</span>
                               </div>
                               <input
                                 type="file"
@@ -1082,7 +1082,7 @@ export default function PesertaDashboardPage() {
                           {file
                             ? <span className="text-[#00ffc8] text-sm font-semibold truncate block">{file.name}</span>
                             : <span className="text-[#8B9A7A] text-xs block">
-                                {syarat.deskripsi || 'Format JPG/PNG/PDF, maks 1MB'}
+                                {syarat.deskripsi || 'Format JPG/PNG/PDF, maks 2MB'}
                               </span>
                           }
                         </div>
@@ -1703,7 +1703,7 @@ export default function PesertaDashboardPage() {
                           {file
                             ? <span className="text-[#00ffc8] text-[12px] block truncate mt-0.5">{file.name}</span>
                             : <span className="text-[#8B9A7A] text-[12px] block mt-0.5">
-                                {syarat.deskripsi || 'Format JPG/PNG/PDF, maks 500KB'}
+                                {syarat.deskripsi || 'Format JPG/PNG/PDF, maks 2MB'}
                               </span>
                           }
                         </div>

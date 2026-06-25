@@ -123,12 +123,12 @@ class PendaftaranController extends Controller
             ->where('id', $id)->where('status', 'ditolak')->firstOrFail();
 
         $rules = [
-            'bukti_transfer' => 'sometimes|file|mimes:jpg,jpeg,png,pdf|max:1000',
+            'bukti_transfer' => 'sometimes|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ];
 
         $syaratList = \App\Models\SyaratBerkas::where('status', 'aktif')->get();
         foreach ($syaratList as $syarat) {
-            $rules['bukti_' . $syarat->key] = 'sometimes|file|mimes:jpg,jpeg,png,pdf|max:1024';
+            $rules['bukti_' . $syarat->key] = 'sometimes|file|mimes:jpg,jpeg,png,pdf|max:2048';
         }
 
         $request->validate($rules);
