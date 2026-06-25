@@ -18,6 +18,10 @@ class UserResource extends JsonResource
             'provinsi'       => $this->provinsi,
             'no_hp'          => $this->no_hp,
             'institusi'      => $this->institusi,
+            'permissions'    => $this->role === 'admin' ? '*' : (cache()->rememberForever('role_permissions', function() {
+                $config = \App\Models\Config::where('key', 'role_permissions')->first();
+                return $config ? json_decode($config->value, true) : [];
+            })[$this->role] ?? []),
             'unread_notif'   => $this->when(
                 $request->routeIs('auth.me') || $request->is('api/auth/me'),
                 fn() => $this->unreadNotifCount()

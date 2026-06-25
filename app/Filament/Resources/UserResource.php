@@ -52,6 +52,12 @@ class UserResource extends Resource
                         Forms\Components\Select::make('role')
                             ->options([
                                 'admin' => 'Admin',
+                                'po' => 'Project Officer (PO)',
+                                'sc' => 'Steering Committee (SC)',
+                                'event' => 'Divisi Acara (Event)',
+                                'humas' => 'Divisi Humas',
+                                'bendahara' => 'Bendahara',
+                                'sekretaris' => 'Sekretaris',
                                 'peserta' => 'Peserta',
                             ])
                             ->required(),
@@ -86,6 +92,8 @@ class UserResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'admin' => 'danger',
+                        'po', 'sc' => 'warning',
+                        'event', 'humas', 'bendahara', 'sekretaris' => 'info',
                         'peserta' => 'success',
                         default => 'gray',
                     })
@@ -106,6 +114,12 @@ class UserResource extends Resource
                 Tables\Filters\SelectFilter::make('role')
                     ->options([
                         'admin' => 'Admin',
+                        'po' => 'Project Officer (PO)',
+                        'sc' => 'Steering Committee (SC)',
+                        'event' => 'Divisi Acara (Event)',
+                        'humas' => 'Divisi Humas',
+                        'bendahara' => 'Bendahara',
+                        'sekretaris' => 'Sekretaris',
                         'peserta' => 'Peserta',
                     ]),
                 Tables\Filters\SelectFilter::make('kategori')

@@ -11,6 +11,7 @@ use App\Models\TimelineLomba;
 use App\Services\SupabaseStorageService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class AdminLombaController extends Controller
 {
@@ -25,6 +26,7 @@ class AdminLombaController extends Controller
 
     public function index(Request $request)
     {
+        Gate::authorize('viewAny', Lomba::class);
         $query = Lomba::withCount([
             'pendaftaran as total_daftar',
             'pendaftaran as pending_count' => fn($q) => $q->where('status', 'pending'),
@@ -40,11 +42,13 @@ class AdminLombaController extends Controller
     public function show(int $id)
     {
         $lomba = Lomba::with(['mitra', 'faq', 'timelineLomba'])->findOrFail($id);
+        Gate::authorize('view', $lomba);
         return $this->success(new LombaDetailResource($lomba));
     }
 
     public function store(StoreLombaRequest $request)
     {
+        Gate::authorize('create', Lomba::class);
         $data = $request->validated();
         $bucket = env('SUPABASE_BUCKET_GALERI', 'galeri-season');
 
@@ -97,6 +101,7 @@ class AdminLombaController extends Controller
     public function update(StoreLombaRequest $request, int $id)
     {
         $lomba = Lomba::findOrFail($id);
+        Gate::authorize('update', $lomba);
         $data  = $request->validated();
         $bucket = env('SUPABASE_BUCKET_GALERI', 'galeri-season');
 
@@ -133,6 +138,7 @@ class AdminLombaController extends Controller
     public function destroy(int $id)
     {
         $lomba = Lomba::findOrFail($id);
+        Gate::authorize('delete', $lomba);
         $bucket = env('SUPABASE_BUCKET_GALERI', 'galeri-season');
 
         if ($lomba->pendaftaran()->exists()) {
@@ -154,6 +160,7 @@ class AdminLombaController extends Controller
     {
         $request->validate(['status' => 'required|in:draft,buka,tutup']);
         $lomba = Lomba::findOrFail($id);
+        Gate::authorize('update', $lomba);
         $lomba->update(['status' => $request->status]);
 
         return $this->success(
@@ -167,6 +174,7 @@ class AdminLombaController extends Controller
     public function storeFaq(Request $request, int $id)
     {
         $lomba = Lomba::findOrFail($id);
+        Gate::authorize('update', $lomba);
         $request->validate([
             'pertanyaan' => 'required|string',
             'jawaban'    => 'required|string',
@@ -186,6 +194,7 @@ class AdminLombaController extends Controller
     public function updateFaq(Request $request, int $id, int $faqId)
     {
         $faq = FaqLomba::where('lomba_id', $id)->findOrFail($faqId);
+        Gate::authorize('update', $faq->lomba);
         $request->validate([
             'pertanyaan' => 'sometimes|string',
             'jawaban'    => 'sometimes|string',
@@ -197,7 +206,9 @@ class AdminLombaController extends Controller
 
     public function destroyFaq(int $id, int $faqId)
     {
-        FaqLomba::where('lomba_id', $id)->findOrFail($faqId)->delete();
+        $faq = FaqLomba::where('lomba_id', $id)->findOrFail($faqId);
+        Gate::authorize('update', $faq->lomba);
+        $faq->delete();
         return $this->success(null, 'FAQ berhasil dihapus');
     }
 
@@ -206,6 +217,7 @@ class AdminLombaController extends Controller
     public function storeTimeline(Request $request, int $id)
     {
         $lomba = Lomba::findOrFail($id);
+        Gate::authorize('update', $lomba);
         $request->validate([
             'stage'      => 'required|string|max:100',
             'tanggal'    => 'required|date',
@@ -227,6 +239,7 @@ class AdminLombaController extends Controller
     public function updateTimeline(Request $request, int $id, int $tlId)
     {
         $tl = TimelineLomba::where('lomba_id', $id)->findOrFail($tlId);
+        Gate::authorize('update', $tl->lomba);
         $request->validate([
             'stage'      => 'sometimes|string|max:100',
             'tanggal'    => 'sometimes|date',
@@ -239,7 +252,9 @@ class AdminLombaController extends Controller
 
     public function destroyTimeline(int $id, int $tlId)
     {
-        TimelineLomba::where('lomba_id', $id)->findOrFail($tlId)->delete();
+        $tl = TimelineLomba::where('lomba_id', $id)->findOrFail($tlId);
+        Gate::authorize('update', $tl->lomba);
+        $tl->delete();
         return $this->success(null, 'Timeline berhasil dihapus');
     }
 }

@@ -22,6 +22,7 @@ class AdminConfigController extends Controller
         'hero_subtagline',
         'hero_bg_url',
         'sponsor_text',
+        'role_permissions',
     ];
 
     public function index()
@@ -40,7 +41,7 @@ class AdminConfigController extends Controller
         }
 
         $request->validate([
-            'value'     => 'nullable|string|max:1000',
+            'value'     => 'nullable|string|max:10000',
             'keterangan'=> 'nullable|string|max:255',
         ]);
 
@@ -52,6 +53,10 @@ class AdminConfigController extends Controller
                 'updated_at' => now(),
             ]
         );
+
+        if ($key === 'role_permissions') {
+            cache()->forget('role_permissions');
+        }
 
         return $this->success(
             ConfigModel::find($key),

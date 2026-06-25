@@ -39,6 +39,7 @@ const AdminLombaForm     = lazy(() => import('@/pages/admin/LombaFormPage'));
 const AdminPengumumanPageComp = lazy(() => import('@/pages/admin/PengumumanPage'));
 const AdminGaleriPageComp = lazy(() => import('@/pages/admin/GaleriPage'));
 const AdminPemenang      = lazy(() => import('@/pages/admin/PemenangPage'));
+const AdminRolePerms     = lazy(() => import('@/pages/admin/RolePermissionsPage'));
 
 // --- Fallback loader ---
 function PageLoader() {
@@ -50,17 +51,19 @@ function PageLoader() {
 }
 
 // --- Route Guards ---
-function RequireAuth({ role }) {
+function RequireAuth({ allowedRoles }) {
   const { user, token } = useAuthStore();
-  if (!token || !user)         return <Navigate to="/login" replace />;
-  if (role && user.role !== role) return <Navigate to="/"  replace />;
+  if (!token || !user) return <Navigate to="/login" replace />;
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
   return <Outlet />;
 }
 
 function GuestOnly() {
   const { token, user } = useAuthStore();
   if (token && user) {
-    if (user.role === 'admin') {
+    if (user.role !== 'peserta') {
       window.location.href = '/admin';
       return null;
     }
@@ -97,7 +100,7 @@ const router = createBrowserRouter([
   },
   // Peserta area
   {
-    element: <RequireAuth role="peserta" />,
+    element: <RequireAuth allowedRoles={['peserta']} />,
     children: [
       {
         element: <PesertaLayout />,
@@ -112,7 +115,7 @@ const router = createBrowserRouter([
   },
   // Admin area
   {
-    element: <RequireAuth role="admin" />,
+    element: <RequireAuth allowedRoles={['admin', 'po', 'sc', 'event', 'humas', 'bendahara', 'sekretaris']} />,
     children: [
       {
         element: <AdminLayout />,
@@ -126,6 +129,12 @@ const router = createBrowserRouter([
           { path: '/admin/pengumuman',              element: <AdminPengumumanPageComp /> },
           { path: '/admin/galeri',                  element: <AdminGaleriPageComp /> },
           { path: '/admin/pemenang',                element: <AdminPemenang /> },
+          {
+            element: <RequireAuth allowedRoles={['admin']} />,
+            children: [
+              { path: '/admin/hak-akses',           element: <AdminRolePerms /> }
+            ]
+          }
         ],
       },
     ],

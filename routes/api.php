@@ -72,7 +72,7 @@ Route::middleware(['auth:sanctum', 'role:peserta'])->group(function () {
 // ============================================================
 // ADMIN
 // ============================================================
-Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin'])->group(function () {
+Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin,po,sc,event,humas,bendahara,sekretaris'])->group(function () {
 
     // Dashboard & Statistik
     Route::get('statistik/overview',    [AdminDashboardController::class, 'overview']);

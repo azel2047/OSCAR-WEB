@@ -8,13 +8,24 @@ import {
 } from 'lucide-react';
 
 const NAV = [
-  { to: '/admin',               label: 'Dashboard',      icon: LayoutDashboard, exact: true },
-  { to: '/admin/pendaftaran',   label: 'Pendaftaran',    icon: ClipboardList },
-  { to: '/admin/lomba',         label: 'Lomba',          icon: Trophy },
-  { to: '/admin/pengumuman',    label: 'Pengumuman',     icon: Megaphone },
-  { to: '/admin/galeri',        label: 'Galeri',         icon: Image },
-  { to: '/admin/pemenang',      label: 'Pemenang',       icon: Award },
+  { to: '/admin',               label: 'Dashboard',      icon: LayoutDashboard, exact: true, roles: ['admin', 'po', 'sc', 'event', 'humas', 'bendahara', 'sekretaris'] },
+  { to: '/admin/pendaftaran',   label: 'Pendaftaran',    icon: ClipboardList, roles: ['admin', 'po', 'sc', 'event', 'bendahara', 'sekretaris'] },
+  { to: '/admin/lomba',         label: 'Lomba',          icon: Trophy, roles: ['admin', 'po', 'sc', 'event', 'humas'] },
+  { to: '/admin/pengumuman',    label: 'Pengumuman',     icon: Megaphone, roles: ['admin', 'po', 'sc', 'humas', 'sekretaris'] },
+  { to: '/admin/galeri',        label: 'Galeri',         icon: Image, roles: ['admin', 'po', 'sc', 'humas'] },
+  { to: '/admin/pemenang',      label: 'Pemenang',       icon: Award, roles: ['admin', 'po', 'sc', 'humas'] },
+  { to: '/admin/hak-akses',     label: 'Hak Akses',      icon: Shield, roles: ['admin'] },
 ];
+
+const ROLE_LABELS = {
+  admin: 'Admin',
+  po: 'Project Officer',
+  sc: 'Steering Committee',
+  event: 'Divisi Acara',
+  humas: 'Divisi Humas',
+  bendahara: 'Bendahara',
+  sekretaris: 'Sekretaris',
+};
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -69,14 +80,16 @@ export default function AdminLayout() {
             </div>
             <div className="min-w-0">
               <p className="font-body text-sm font-semibold text-text-primary truncate">{user?.nama}</p>
-              <span className="badge badge-amber text-[12px] px-2 py-0.5 mt-0.5">Admin</span>
+              <span className="badge badge-amber text-[12px] px-2 py-0.5 mt-0.5">
+                {ROLE_LABELS[user?.role] || user?.role}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
-          {NAV.map(({ to, label, icon: Icon, exact }) => (
+          {NAV.filter(item => !item.roles || item.roles.includes(user?.role)).map(({ to, label, icon: Icon, exact }) => (
             <NavLink
               key={to}
               to={to}

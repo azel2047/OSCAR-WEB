@@ -763,7 +763,6 @@ export default function LandingPage() {
                   HIMA TI STT TERPADU NF
                 </h4>
                 <span className="font-mono text-[12px] text-white/40 uppercase">
-                  EST. 2016
                 </span>
               </div>
             </div>
