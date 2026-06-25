@@ -2,14 +2,7 @@ import { useEffect, useRef } from 'react';
 import { gsap, ScrollTrigger } from '@/animations/gsapConfig';
 import { staggerFadeUp } from '@/animations/textReveal';
 
-import { Mail, MapPin, Instagram, Sparkles, BookOpen, Users, Target, Eye } from 'lucide-react';
-
-const TEAM = [
-  { name: 'Ahmad Farhan',    role: 'Ketua Pelaksana',    avatar: 'AF' },
-  { name: 'Bintang Saputra', role: 'Koordinator Teknis', avatar: 'BS' },
-  { name: 'Citra Dewi',      role: 'Humas & Sponsorship', avatar: 'CD' },
-  { name: 'Dimas Nugroho',   role: 'Koordinator Juri',   avatar: 'DN' },
-];
+import { Mail, MapPin, Instagram, Sparkles, BookOpen, Target, Eye } from 'lucide-react';
 
 const FAQ = [
   { q: 'Siapa yang bisa mengikuti kompetisi OSCAR 3.0?', a: 'Seluruh mahasiswa aktif jenjang D3/D4/S1/S2 dari seluruh perguruan tinggi negeri maupun swasta di Indonesia.' },
@@ -19,7 +12,6 @@ const FAQ = [
 ];
 
 export default function TentangPage() {
-  const teamRef = useRef(null);
   const pageRef = useRef(null);
   const floatShapesRef = useRef([]);
 
@@ -54,25 +46,6 @@ export default function TentangPage() {
           delay: i * 0.2
         });
       });
-
-      // Team cards stagger
-      const cards = teamRef.current?.querySelectorAll('.team-card');
-      if (cards?.length) {
-        gsap.fromTo(cards,
-          { opacity: 0, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            stagger: 0.1,
-            duration: 0.8,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: teamRef.current,
-              start: 'top 80%'
-            }
-          }
-        );
-      }
 
       // FAQ items stagger
       const faqItems = document.querySelectorAll('.faq-item');
@@ -198,39 +171,6 @@ export default function TentangPage() {
                 </div>
               );
             })}
-          </div>
-        </section>
-
-        {/* ── TEAM ── */}
-        <section ref={teamRef} className="py-20 px-6 sm:px-12 relative z-10 border-t border-[#70C492]/10 bg-[#153427]/30">
-          <div className="max-w-[1600px] mx-auto">
-            <div className="flex flex-col items-center sm:items-start mb-12">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(112,196,146,0.08)] border border-[rgba(112,196,146,0.2)] mb-4">
-                <Users size={12} className="text-[#70C492]" />
-                <span className="text-[#70C492] font-mono text-[12px] tracking-widest uppercase font-bold">PANITIA PELAKSANA</span>
-              </div>
-              <h2 className="font-cyber text-3xl sm:text-5xl font-bold text-white tracking-tight uppercase leading-none">
-                Tim Pelaksana Tim <span className="bg-gradient-to-r from-[#70C492] to-[#79C199] bg-clip-text text-transparent">OSCAR</span>
-              </h2>
-            </div>
-            
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-              {TEAM.map((m) => (
-                <div 
-                  key={m.name} 
-                  className="team-card bg-[#18412E]/60 backdrop-blur-[25px] border border-[rgba(112,196,146,0.12)] shadow-[0_30px_60px_rgba(0,0,0,0.6)] p-6 rounded-[24px] text-center group transition-all duration-500 hover:border-[#70C492]/30 hover:shadow-[0_40px_80px_rgba(0,0,0,0.8),0_0_15px_rgba(112,196,146,0.08)] relative overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(112,196,146,0.04)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                  <div className="relative z-10">
-                    <div className="w-16 h-16 rounded-full bg-[#70C492]/5 border border-[#70C492]/20 flex items-center justify-center mx-auto mb-5 group-hover:scale-110 group-hover:border-[#70C492]/40 transition-all duration-300">
-                      <span className="font-cyber text-[#70C492] text-lg font-bold">{m.avatar}</span>
-                    </div>
-                    <h3 className="font-cyber font-bold text-white text-base group-hover:text-[#70C492] transition-colors duration-300">{m.name}</h3>
-                    <p className="text-[#7A9A8A] text-xs mt-1.5 font-mono uppercase tracking-wider">{m.role}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </section>
 
