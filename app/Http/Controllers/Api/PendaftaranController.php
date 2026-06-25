@@ -123,10 +123,10 @@ class PendaftaranController extends Controller
             ->where('id', $id)->where('status', 'ditolak')->firstOrFail();
 
         $request->validate([
-            'bukti_transfer' => 'sometimes|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'bukti_sosmed'   => 'sometimes|file|mimes:jpg,jpeg,png|max:2048',
-            'bukti_follow_medpart' => 'sometimes|file|mimes:jpg,jpeg,png|max:2048',
-            'bukti_follow_sponsor' => 'sometimes|file|mimes:jpg,jpeg,png|max:2048',
+            'bukti_transfer' => 'sometimes|file|mimes:jpg,jpeg,png,pdf|max:500',
+            'bukti_sosmed'   => 'sometimes|file|mimes:jpg,jpeg,png|max:500',
+            'bukti_follow_medpart' => 'sometimes|file|mimes:jpg,jpeg,png|max:500',
+            'bukti_follow_sponsor' => 'sometimes|file|mimes:jpg,jpeg,png|max:500',
         ]);
 
         $bucket = env('SUPABASE_BUCKET_BERKAS', 'berkas-pendaftaran');

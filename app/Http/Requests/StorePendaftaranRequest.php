@@ -19,12 +19,12 @@ class StorePendaftaranRequest extends FormRequest
             'no_wa'          => ['required', 'regex:/^(\+62|62|0)8[0-9]{8,11}$/'],
             'email'          => 'required|email',
             'tema'           => 'required|string|max:100',
-            'bukti_transfer' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'bukti_sosmed'   => 'required|file|mimes:jpg,jpeg,png|max:2048',
-            'bukti_sosmed_hima' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
-            'bukti_twibbon'  => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
-            'bukti_follow_medpart' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
-            'bukti_follow_sponsor' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            'bukti_transfer' => 'required|file|mimes:jpg,jpeg,png,pdf|max:500',
+            'bukti_sosmed'   => 'required|file|mimes:jpg,jpeg,png|max:500',
+            'bukti_sosmed_hima' => 'nullable|file|mimes:jpg,jpeg,png|max:500',
+            'bukti_twibbon'  => 'nullable|file|mimes:jpg,jpeg,png|max:500',
+            'bukti_follow_medpart' => 'nullable|file|mimes:jpg,jpeg,png|max:500',
+            'bukti_follow_sponsor' => 'nullable|file|mimes:jpg,jpeg,png|max:500',
         ];
 
         $lomba = Lomba::find($this->lomba_id);
@@ -54,7 +54,7 @@ class StorePendaftaranRequest extends FormRequest
             'no_wa.regex'           => 'Format nomor WhatsApp tidak valid. Gunakan format 08xx atau +628xx.',
             'bukti_transfer.mimes'  => 'File bukti transfer harus berformat JPG, PNG, atau PDF.',
             'bukti_sosmed.mimes'    => 'File bukti sosmed harus berformat JPG atau PNG.',
-            'bukti_transfer.max'    => 'Ukuran file bukti transfer maksimal 2MB.',
+            'bukti_transfer.max'    => 'Ukuran file bukti transfer maksimal 500KB.',
         ];
     }
 

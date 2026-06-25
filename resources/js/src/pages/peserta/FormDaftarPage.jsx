@@ -471,7 +471,7 @@ export default function FormDaftarPage() {
                     <span className="text-white text-xs font-semibold block truncate">File Bukti Transaksi</span>
                     {files.bukti_transfer
                       ? <span className="text-[#00ffc8] text-[12px] block truncate mt-0.5">{files.bukti_transfer.name}</span>
-                      : <span className="text-[#8B9A7A] text-[12px] block mt-0.5">PDF/JPG/PNG maks 2MB</span>
+                      : <span className="text-[#8B9A7A] text-[12px] block mt-0.5">PDF/JPG/PNG maks 500KB</span>
                     }
                   </div>
                   <input type="file" className="sr-only" accept=".pdf,.jpg,.jpeg,.png"
@@ -489,7 +489,7 @@ export default function FormDaftarPage() {
                     <span className="text-white text-xs font-semibold block truncate">Bukti Instagram Oscar & HIMA</span>
                     {files.bukti_sosmed
                       ? <span className="text-[#00ffc8] text-[12px] block truncate mt-0.5">{files.bukti_sosmed.name}</span>
-                      : <span className="text-[#8B9A7A] text-[12px] block mt-0.5">Format JPG/PNG, maks 2MB</span>
+                      : <span className="text-[#8B9A7A] text-[12px] block mt-0.5">Format JPG/PNG, maks 500KB</span>
                     }
                   </div>
                   <input type="file" className="sr-only" accept=".jpg,.jpeg,.png"
