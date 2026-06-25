@@ -616,12 +616,12 @@ export default function FormDaftarPage() {
                 const file = files[fileKey];
                 return (
                   <div key={syarat.id} className="space-y-2">
-                    <label className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-white/10 hover:border-[#00ffc8]/50 cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] duration-300">
+                    <label className="flex items-start sm:items-center gap-3 p-4 rounded-xl border border-dashed border-white/10 hover:border-[#00ffc8]/50 cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] duration-300">
                       <div className="w-9 h-9 rounded-lg bg-[#00ffc8]/5 border border-[#00ffc8]/20 flex items-center justify-center flex-shrink-0 text-[#00ffc8]">
                         <Upload size={16} />
                       </div>
-                      <div className="flex-1 min-w-0 flex items-center justify-between gap-3">
-                        <div className="min-w-0">
+                      <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="min-w-0 w-full">
                           <span className="text-white text-xs font-semibold block truncate">
                             {syarat.nama} {syarat.is_required && <span className="text-red-400">*</span>}
                           </span>
@@ -632,14 +632,14 @@ export default function FormDaftarPage() {
                               </span>
                           }
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                           {syarat.file_template_url && (
                             <a
                               href={syarat.file_template_url}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="px-3 py-1.5 rounded-lg border border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/10 transition-all text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 whitespace-nowrap z-10"
+                              className="px-3 py-1.5 rounded-lg border border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/10 transition-all text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 justify-center whitespace-nowrap z-10 w-full sm:w-auto"
                             >
                               <Upload size={12} className="rotate-180" /> Unduh Template
                             </a>
@@ -650,7 +650,7 @@ export default function FormDaftarPage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="px-3 py-1.5 rounded-lg border border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/10 transition-all text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 whitespace-nowrap z-10"
+                              className="px-3 py-1.5 rounded-lg border border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/10 transition-all text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 justify-center whitespace-nowrap z-10 w-full sm:w-auto"
                             >
                               <ExternalLink size={12} /> Kunjungi
                             </a>
