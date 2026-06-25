@@ -32,11 +32,15 @@ class PendaftaranResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $makeBerkasPlaceholder = function (string $key, string $label, string $method, string $buttonText, string $color) {
+        $makeBerkasPlaceholder = function (string $key, string $label, string $method, string $buttonText, string $color, ?string $syaratKey = null) {
             return Forms\Components\Placeholder::make($key)
                 ->label($label)
-                ->content(function ($record) use ($method, $buttonText, $color) {
-                    $berkas = $record?->$method();
+                ->content(function ($record) use ($method, $buttonText, $color, $syaratKey) {
+                    if ($syaratKey) {
+                        $berkas = $record?->berkasSyarat($syaratKey);
+                    } else {
+                        $berkas = $record?->$method();
+                    }
                     if (!$berkas) return 'Belum diunggah / Tidak ada';
                     
                     $isImage = $berkas->mime_type && str_starts_with($berkas->mime_type, 'image/');
@@ -66,6 +70,28 @@ class PendaftaranResource extends Resource
                         </div>");
                 });
         };
+
+        // Static schemas
+        $berkasSchema = [
+            $makeBerkasPlaceholder('bukti_transfer', 'Bukti Pembayaran / Transfer', 'berkasTransfer', 'BUKA BUKTI TRANSFER', 'emerald'),
+        ];
+
+        // Dynamic schemas
+        try {
+            $syaratList = \App\Models\SyaratBerkas::where('status', 'aktif')->orderBy('id')->get();
+            foreach ($syaratList as $syarat) {
+                $berkasSchema[] = $makeBerkasPlaceholder(
+                    'bukti_syarat_' . $syarat->key,
+                    $syarat->nama,
+                    '',
+                    'BUKA ' . strtoupper(str_replace('Bukti ', '', $syarat->nama)),
+                    'blue',
+                    $syarat->key
+                );
+            }
+        } catch (\Exception $e) {
+            // Fallback
+        }
 
         return $schema
             ->schema([
@@ -107,14 +133,7 @@ class PendaftaranResource extends Resource
                     ->description('Unduh atau buka bukti administrasi yang diunggah peserta')
                     ->schema([
                         Grid::make(2)
-                            ->schema([
-                                $makeBerkasPlaceholder('bukti_transfer', 'Bukti Pembayaran / Transfer', 'berkasTransfer', 'BUKA BUKTI TRANSFER', 'emerald'),
-                                $makeBerkasPlaceholder('bukti_sosmed', 'Bukti Follow Instagram Oscar 3.0', 'berkasSosmed', 'BUKA BUKTI INSTAGRAM', 'blue'),
-                                $makeBerkasPlaceholder('bukti_sosmed_hima', 'Bukti Follow HIMA TI', 'berkasSosmedHima', 'BUKA BUKTI FOLLOW HIMA TI', 'blue'),
-                                $makeBerkasPlaceholder('bukti_twibbon', 'Bukti Post Twibbon', 'berkasTwibbon', 'BUKA BUKTI TWIBBON', 'blue'),
-                                $makeBerkasPlaceholder('bukti_follow_medpart', 'Bukti Follow Media Partner', 'berkasFollowMedpart', 'BUKA BUKTI FOLLOW MEDPART', 'blue'),
-                                $makeBerkasPlaceholder('bukti_follow_sponsor', 'Bukti Follow Sponsor Resmi', 'berkasFollowSponsor', 'BUKA BUKTI FOLLOW SPONSOR', 'blue'),
-                            ]),
+                            ->schema($berkasSchema),
                     ]),
 
                 Section::make('Hasil Keputusan & Riwayat Admin')

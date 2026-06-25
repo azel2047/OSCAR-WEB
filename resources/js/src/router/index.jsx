@@ -29,6 +29,7 @@ const PesertaDashboard   = lazy(() => import('@/pages/peserta/DashboardPage'));
 const PesertaFormDaftar  = lazy(() => import('@/pages/peserta/FormDaftarPage'));
 const PesertaRiwayat     = lazy(() => import('@/pages/peserta/RiwayatPage'));
 const PesertaProfil      = lazy(() => import('@/pages/peserta/ProfilPage'));
+const PesertaPengumpulan = lazy(() => import('@/pages/peserta/PengumpulanKaryaPage'));
 
 // --- Lazy pages: Admin (rebuild trigger) ---
 const AdminDashboard     = lazy(() => import('@/pages/admin/DashboardPage'));
@@ -109,6 +110,7 @@ const router = createBrowserRouter([
           { path: '/peserta/daftar',    element: <PesertaFormDaftar /> },
           { path: '/peserta/riwayat',   element: <PesertaRiwayat /> },
           { path: '/peserta/profil',    element: <PesertaProfil /> },
+          { path: '/peserta/pengumpulan', element: <PesertaPengumpulan /> },
         ],
       },
     ],

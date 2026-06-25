@@ -20,6 +20,7 @@ class LombaSeeder extends Seeder
             Lomba::updateOrCreate(['slug' => $item['slug']], array_merge($item, [
                 'status'   => 'buka',
                 'deadline' => now()->addDays(45),
+                'surat_izin_path' => 'https://docs.google.com/document/d/1Xy_Jz-zF8_dummy_template/edit?usp=sharing'
             ]));
         }
     }

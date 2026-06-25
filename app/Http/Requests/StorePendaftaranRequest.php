@@ -19,20 +19,22 @@ class StorePendaftaranRequest extends FormRequest
             'no_wa'          => ['required', 'regex:/^(\+62|62|0)8[0-9]{8,11}$/'],
             'email'          => 'required|email',
             'tema'           => 'required|string|max:100',
-            'bukti_transfer' => 'required|file|mimes:jpg,jpeg,png,pdf|max:500',
-            'bukti_sosmed'   => 'required|file|mimes:jpg,jpeg,png|max:500',
-            'bukti_sosmed_hima' => 'nullable|file|mimes:jpg,jpeg,png|max:500',
-            'bukti_twibbon'  => 'nullable|file|mimes:jpg,jpeg,png|max:500',
-            'bukti_follow_medpart' => 'nullable|file|mimes:jpg,jpeg,png|max:500',
-            'bukti_follow_sponsor' => 'nullable|file|mimes:jpg,jpeg,png|max:500',
+            'bukti_transfer' => 'required|file|mimes:jpg,jpeg,png,pdf|max:1000',
+
         ];
+
+        // Validasi dinamis untuk syarat berkas
+        $syaratList = \App\Models\SyaratBerkas::where('status', 'aktif')->get();
+        foreach ($syaratList as $syarat) {
+            $rules['bukti_' . $syarat->key] = ($syarat->is_required ? 'required' : 'nullable') . '|file|mimes:jpg,jpeg,png,pdf|max:1024';
+        }
 
         $lomba = Lomba::find($this->lomba_id);
         if ($lomba) {
             if (in_array($lomba->slug, ['web-development'])) {
                 $rules['asal_sekolah']     = 'required|string|min:3|max:150';
                 $rules['nama_peserta_1']   = 'required|string|min:3|max:100';
-                $rules['nama_peserta_2']   = 'required|string|min:3|max:100';
+                $rules['nama_peserta_2']   = 'nullable|string|max:100';
                 $rules['nama_pendamping']  = 'required|string|min:3|max:100';
             } elseif (in_array($lomba->slug, ['desain-poster', 'desain-infografis'])) {
                 $rules['asal_sekolah']     = 'required|string|min:3|max:150';
@@ -60,10 +62,17 @@ class StorePendaftaranRequest extends FormRequest
 
     public function getData(): array
     {
-        return $this->except([
-            'bukti_transfer', 'bukti_sosmed', 'bukti_sosmed_hima', 
-            'bukti_twibbon', 'bukti_follow_medpart', 'bukti_follow_sponsor', 
+        $exclude = [
+            'bukti_transfer',
+
             '_token'
-        ]);
+        ];
+
+        $syaratKeys = \App\Models\SyaratBerkas::pluck('key')->toArray();
+        foreach ($syaratKeys as $key) {
+            $exclude[] = 'bukti_' . $key;
+        }
+
+        return $this->except($exclude);
     }
 }

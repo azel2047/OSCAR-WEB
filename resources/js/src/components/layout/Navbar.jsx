@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import gsap from '@/animations/gsapConfig';
 import useAuthStore from '@/stores/authStore';
 import useNotifStore from '@/stores/notifStore';
+import usePendaftaranStore from '@/stores/pendaftaranStore';
 import {
   Bell, Menu, X, ChevronDown, LogOut, User,
   LayoutDashboard, ArrowRight, Sparkles,
@@ -29,14 +30,23 @@ export default function Navbar() {
 
   const { user, token, logout } = useAuthStore();
   const { unreadCount, fetchNotifications } = useNotifStore();
+  const { daftarList, fetchMyPendaftaran } = usePendaftaranStore();
 
   const [menuOpen,     setMenuOpen]     = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [scrolled,     setScrolled]     = useState(false);
 
+  // Fetch participant's registration if logged in
+  useEffect(() => {
+    if (token && user && user.role === 'peserta') {
+      fetchMyPendaftaran();
+    }
+  }, [token, user]);
+
   // ── Dynamic Navigation Links
+  const hasRegistered = token && user && user.role === 'peserta' && daftarList && daftarList.length > 0;
   const dynamicPendaftaranPath = token && user
-    ? (user.role === 'admin' ? '/admin' : '/peserta/daftar')
+    ? (user.role === 'admin' ? '/admin' : (hasRegistered ? '/peserta' : '/peserta/daftar'))
     : '/register';
 
   const navLinks = [
@@ -44,7 +54,7 @@ export default function Navbar() {
     { to: '/lomba',    label: 'LOMBA'               },
     { to: '/roadmap',  label: 'ROADMAP'             },
     { to: '/tentang',  label: 'TENTANG'             },
-    { to: dynamicPendaftaranPath, label: 'PENDAFTARAN' },
+    { to: dynamicPendaftaranPath, label: hasRegistered ? 'HALAMAN PESERTA' : 'PENDAFTARAN' },
   ];
 
   // ── Notifications
@@ -233,13 +243,22 @@ export default function Navbar() {
                                 <LayoutDashboard size={15} /> Dashboard
                               </a>
                             ) : (
-                              <Link
-                                to="/peserta/profil"
-                                onClick={() => setUserMenuOpen(false)}
-                                className="flex items-center gap-3 px-4 py-2.5 text-[#7A9A8A] hover:text-[#70C492] hover:bg-[#70C492]/[0.04] text-[13px] transition-colors"
-                              >
-                                <User size={15} /> Profil Saya
-                              </Link>
+                              <>
+                                <Link
+                                  to="/peserta"
+                                  onClick={() => setUserMenuOpen(false)}
+                                  className="flex items-center gap-3 px-4 py-2.5 text-[#7A9A8A] hover:text-[#70C492] hover:bg-[#70C492]/[0.04] text-[13px] transition-colors"
+                                >
+                                  <LayoutDashboard size={15} /> Halaman Peserta
+                                </Link>
+                                <Link
+                                  to="/peserta/profil"
+                                  onClick={() => setUserMenuOpen(false)}
+                                  className="flex items-center gap-3 px-4 py-2.5 text-[#7A9A8A] hover:text-[#70C492] hover:bg-[#70C492]/[0.04] text-[13px] transition-colors"
+                                >
+                                  <User size={15} /> Profil Saya
+                                </Link>
+                              </>
                             )}
                           </div>
 
@@ -427,11 +446,18 @@ function MobileMenu({ isOpen, links, user, token, onClose, onLogout, dashPath })
                   </button>
                 </a>
               ) : (
-                <Link to="/peserta/profil" onClick={onClose}>
-                  <button className="w-full px-6 py-3.5 rounded-2xl bg-[#70C492] text-[#112C1E] font-bold text-sm flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-[0_0_20px_rgba(112,196,146,0.2)]">
-                    <User size={16} /> Profil Saya
-                  </button>
-                </Link>
+                <div className="flex flex-col gap-2 w-full">
+                  <Link to="/peserta" onClick={onClose} className="w-full">
+                    <button className="w-full px-6 py-3.5 rounded-2xl bg-[#70C492] text-[#112C1E] font-bold text-sm flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-[0_0_20px_rgba(112,196,146,0.2)]">
+                      <LayoutDashboard size={16} /> Halaman Peserta
+                    </button>
+                  </Link>
+                  <Link to="/peserta/profil" onClick={onClose} className="w-full">
+                    <button className="w-full px-6 py-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-white/[0.04] transition-all">
+                      <User size={16} /> Profil Saya
+                    </button>
+                  </Link>
+                </div>
               )}
               <button
                 onClick={() => { onLogout(); onClose(); }}

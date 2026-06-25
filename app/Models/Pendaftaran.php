@@ -85,6 +85,16 @@ class Pendaftaran extends Model
         return $this->berkas->where('jenis', 'follow_sponsor')->first();
     }
 
+    public function berkasSuratIzin(): ?BerkasPendaftaran
+    {
+        return $this->berkas->where('jenis', 'surat_izin')->first();
+    }
+
+    public function berkasSyarat(string $key): ?BerkasPendaftaran
+    {
+        return $this->berkas->where('jenis', $key)->first();
+    }
+
     protected static function boot()
     {
         parent::boot();

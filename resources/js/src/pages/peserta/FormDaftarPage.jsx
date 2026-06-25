@@ -5,6 +5,7 @@ import usePendaftaranStore from '@/stores/pendaftaranStore';
 import useLombaStore from '@/stores/lombaStore';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import api from '@/api/axios';
 import { 
   CheckCircle, ChevronRight, ChevronLeft, Upload, Info, 
   Clock, AlertCircle, Shield, Check, ExternalLink, 
@@ -17,6 +18,8 @@ const INPUT_CLASS = "!border-0 !rounded-xl bg-white/[0.02] hover:bg-white/[0.04]
 export default function FormDaftarPage() {
   const { user } = useAuthStore();
   const { 
+    daftarList,
+    fetchMyPendaftaran,
     isSubmitting, 
     submitError, 
     submitPendaftaran,
@@ -31,6 +34,9 @@ export default function FormDaftarPage() {
   // Form registration state
   const [step, setStep] = useState(1);
   const [isSuccessScreen, setIsSuccessScreen] = useState(false);
+  const [showAnggota2, setShowAnggota2] = useState(false);
+  const [showAnggota3, setShowAnggota3] = useState(false);
+  const [syaratList, setSyaratList] = useState([]);
 
   // Form Fields
   const [formData, setFormData] = useState({
@@ -49,16 +55,38 @@ export default function FormDaftarPage() {
 
   // Files State
   const [files, setFiles] = useState({
-    bukti_transfer: null,
-    bukti_sosmed: null,
-    bukti_sosmed_hima: null,
-    bukti_twibbon: null
+    bukti_transfer: null
   });
 
   useEffect(() => {
     fetchLomba();
     clearError();
+    if (user && user.role === 'peserta') {
+      fetchMyPendaftaran();
+    }
+    const fetchSyarat = async () => {
+      try {
+        const response = await api.get('/syarat-berkas');
+        setSyaratList(response.data.data);
+      } catch (err) {
+        console.error('Error fetching syarat berkas:', err);
+      }
+    };
+    fetchSyarat();
   }, []);
+
+  // Redirect if already registered
+  useEffect(() => {
+    if (daftarList && daftarList.length > 0) {
+      navigate('/peserta', { replace: true });
+    }
+  }, [daftarList]);
+
+  // Prefill toggle states when data is loaded
+  useEffect(() => {
+    if (formData.nama_peserta_2) setShowAnggota2(true);
+    if (formData.nama_peserta_3) setShowAnggota3(true);
+  }, [formData.nama_peserta_2, formData.nama_peserta_3]);
 
   // GSAP Entrance Animations
   useEffect(() => {
@@ -79,12 +107,65 @@ export default function FormDaftarPage() {
   const isCTF = selectedLomba?.slug === 'ctf' || selectedLomba?.nama?.toLowerCase().includes('ctf');
   const isPosterOrInfo = selectedLomba?.slug === 'desain-poster' || selectedLomba?.slug === 'desain-infografis' || selectedLomba?.nama?.toLowerCase().includes('poster') || selectedLomba?.nama?.toLowerCase().includes('infografis');
 
+  const getTemaOptions = (slug) => {
+    if (slug === 'web-development') {
+      return [
+        'Teknologi Hijau & Konservasi Alam (Green Tech)',
+        'Eco-Tourism & Keanekaragaman Hayati',
+        'Manajemen Limbah & Karbon Digital'
+      ];
+    }
+    if (slug === 'desain-poster') {
+      return [
+        'Restorasi Hutan Tropis & Kehidupan Liar',
+        'Dampak Perubahan Iklim di Sekitar Kita',
+        'Harmoni Alam dan Teknologi Masa Depan'
+      ];
+    }
+    if (slug === 'desain-infografis') {
+      return [
+        'Pentingnya Menjaga Paru-Paru Dunia',
+        'Transisi Energi Bersih untuk Kelestarian Hutan',
+        'Statistik Deforestasi & Solusi Digital'
+      ];
+    }
+    if (slug === 'ctf') {
+      return [
+        'Keamanan Infrastruktur Cloud & IoT',
+        'Eksploitasi & Pertahanan Sistem Hutan Pintar',
+        'Kriptografi & Analisis Forensik Digital'
+      ];
+    }
+    if (slug === 'ui-ux-design') {
+      return [
+        'Desain Antarmuka Platform Edukasi Kehutanan',
+        'Solusi UX Transparansi Karbon & Reboisasi',
+        'Aplikasi Mobile Pelacak Deforestasi Real-time'
+      ];
+    }
+    return [
+      'Inovasi Digital untuk Kelestarian Hutan Tropis',
+      'Pemanfaatan IoT/AI dalam Pemantauan Lingkungan',
+      'Kampanye Kreatif Kesadaran Perubahan Iklim'
+    ];
+  };
+
   const handleTextChange = (e) => {
     setFormData(p => ({ ...p, [e.target.name]: e.target.value }));
   };
 
   const handleFileChange = (key, file) => {
     setFiles(p => ({ ...p, [key]: file }));
+  };
+
+  const isFormValid = () => {
+    if (!files.bukti_transfer) return false;
+    for (const syarat of syaratList) {
+      if (syarat.is_required && !files[`bukti_${syarat.key}`]) {
+        return false;
+      }
+    }
+    return true;
   };
 
   // Submit Registration
@@ -111,7 +192,14 @@ export default function FormDaftarPage() {
     }
 
     if (files.bukti_transfer) fd.append('bukti_transfer', files.bukti_transfer);
-    if (files.bukti_sosmed) fd.append('bukti_sosmed', files.bukti_sosmed);
+
+
+    syaratList.forEach(syarat => {
+      const fileKey = `bukti_${syarat.key}`;
+      if (files[fileKey]) {
+        fd.append(fileKey, files[fileKey]);
+      }
+    });
 
     const res = await submitPendaftaran(fd);
     if (res.success) {
@@ -119,15 +207,7 @@ export default function FormDaftarPage() {
     }
   };
 
-  // Quick select category from bottom cards
-  const selectLombaBySlug = (slugKeywords) => {
-    const match = lombaList.find(l => 
-      slugKeywords.some(kw => l.slug?.includes(kw) || l.nama?.toLowerCase().includes(kw))
-    );
-    if (match) {
-      setFormData(p => ({ ...p, lomba_id: match.id }));
-    }
-  };
+
 
   // ==========================================
   // CASE 1: SUCCESS REGISTRATION SCREEN
@@ -326,26 +406,73 @@ export default function FormDaftarPage() {
               />
 
               {!isPosterOrInfo && (
-                <Input
-                  label="NAMA ANGGOTA 2"
-                  name="nama_peserta_2"
-                  placeholder="Khusus Web Dev, CTF"
-                  value={formData.nama_peserta_2}
-                  onChange={handleTextChange}
-                  className={INPUT_CLASS}
-                  required={isWebDev}
-                />
+                showAnggota2 ? (
+                  <div className="relative">
+                    <Input
+                      label="NAMA ANGGOTA 2"
+                      name="nama_peserta_2"
+                      placeholder="Khusus Web Dev, CTF"
+                      value={formData.nama_peserta_2}
+                      onChange={handleTextChange}
+                      className={INPUT_CLASS}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAnggota2(false);
+                        setFormData(p => ({ ...p, nama_peserta_2: '' }));
+                      }}
+                      className="absolute right-0 top-0 text-[10px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
+                    >
+                      [ Hapus ]
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setShowAnggota2(true)}
+                      className="w-full py-3.5 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+                    >
+                      + Tambah Anggota 2
+                    </button>
+                  </div>
+                )
               )}
 
-              {isCTF && (
-                <Input
-                  label="NAMA ANGGOTA 3"
-                  name="nama_peserta_3"
-                  placeholder="Khusus CTF (Opsional)"
-                  value={formData.nama_peserta_3}
-                  onChange={handleTextChange}
-                  className={INPUT_CLASS}
-                />
+              {isCTF && showAnggota2 && (
+                showAnggota3 ? (
+                  <div className="relative">
+                    <Input
+                      label="NAMA ANGGOTA 3"
+                      name="nama_peserta_3"
+                      placeholder="Khusus CTF (Opsional)"
+                      value={formData.nama_peserta_3}
+                      onChange={handleTextChange}
+                      className={INPUT_CLASS}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAnggota3(false);
+                        setFormData(p => ({ ...p, nama_peserta_3: '' }));
+                      }}
+                      className="absolute right-0 top-0 text-[10px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
+                    >
+                      [ Hapus ]
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setShowAnggota3(true)}
+                      className="w-full py-3.5 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+                    >
+                      + Tambah Anggota 3
+                    </button>
+                  </div>
+                )
               )}
 
               <Input
@@ -384,15 +511,19 @@ export default function FormDaftarPage() {
 
             <div className="space-y-1.5">
               <label className="font-display text-[12px] font-bold tracking-widest uppercase text-[#8B9A7A]">TEMA LOMBA YANG DIIKUTI</label>
-              <textarea
+              <Input
+                as="select"
                 name="tema"
-                placeholder="Tulis judul ide inovasi atau ringkasan gagasan Anda..."
-                rows={3}
                 value={formData.tema}
                 onChange={handleTextChange}
-                className={`w-full p-4 text-sm resize-none ${INPUT_CLASS}`}
+                className={INPUT_CLASS}
                 required
-              />
+              >
+                <option value="" className="bg-[#0A1A0A] text-[#8B9A7A]">-- Pilih Tema Lomba --</option>
+                {getTemaOptions(selectedLomba?.slug).map((option) => (
+                  <option key={option} value={option} className="bg-[#0D1E0D] text-white">{option}</option>
+                ))}
+              </Input>
             </div>
 
             {/* Navigation buttons */}
@@ -407,7 +538,7 @@ export default function FormDaftarPage() {
               </Button>
               <Button
                 variant="solid"
-                disabled={!formData.nama_peserta_1 || !formData.no_wa || !formData.tema || (isWebDev && (!formData.nama_peserta_2 || !formData.nama_pendamping || !formData.no_wa_pendamping))}
+                disabled={!formData.nama_peserta_1 || !formData.no_wa || !formData.tema || (isWebDev && ((showAnggota2 && !formData.nama_peserta_2) || !formData.nama_pendamping || !formData.no_wa_pendamping))}
                 onClick={() => setStep(3)}
                 className="bg-[#00ffc8] hover:bg-[#00e6b5] text-[#020a06] font-bold rounded-xl px-6.5 py-3.5 flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,255,200,0.2)] transition-all font-mono"
               >
@@ -479,23 +610,65 @@ export default function FormDaftarPage() {
                 </label>
               </div>
 
-              {/* Bukti Instagram */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-white/10 hover:border-[#00ffc8]/50 cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] duration-300">
-                  <div className="w-9 h-9 rounded-lg bg-[#00ffc8]/5 border border-[#00ffc8]/20 flex items-center justify-center flex-shrink-0 text-[#00ffc8]">
-                    <Upload size={16} />
+              {/* Dynamic Syarat Berkas */}
+              {syaratList.map((syarat) => {
+                const fileKey = `bukti_${syarat.key}`;
+                const file = files[fileKey];
+                return (
+                  <div key={syarat.id} className="space-y-2">
+                    <label className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-white/10 hover:border-[#00ffc8]/50 cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] duration-300">
+                      <div className="w-9 h-9 rounded-lg bg-[#00ffc8]/5 border border-[#00ffc8]/20 flex items-center justify-center flex-shrink-0 text-[#00ffc8]">
+                        <Upload size={16} />
+                      </div>
+                      <div className="flex-1 min-w-0 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <span className="text-white text-xs font-semibold block truncate">
+                            {syarat.nama} {syarat.is_required && <span className="text-red-400">*</span>}
+                          </span>
+                          {file
+                            ? <span className="text-[#00ffc8] text-[12px] block truncate mt-0.5">{file.name}</span>
+                            : <span className="text-[#8B9A7A] text-[12px] block mt-0.5">
+                                {syarat.deskripsi || 'Format JPG/PNG/PDF, maks 500KB'}
+                              </span>
+                          }
+                        </div>
+                        <div className="flex gap-2">
+                          {syarat.file_template_url && (
+                            <a
+                              href={syarat.file_template_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="px-3 py-1.5 rounded-lg border border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/10 transition-all text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 whitespace-nowrap z-10"
+                            >
+                              <Upload size={12} className="rotate-180" /> Unduh Template
+                            </a>
+                          )}
+                          {syarat.url_target && (
+                            <a
+                              href={syarat.url_target}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="px-3 py-1.5 rounded-lg border border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/10 transition-all text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 whitespace-nowrap z-10"
+                            >
+                              <ExternalLink size={12} /> Kunjungi
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      <input 
+                        type="file" 
+                        className="sr-only" 
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange(fileKey, e.target.files?.[0])} 
+                      />
+                    </label>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-white text-xs font-semibold block truncate">Bukti Instagram Oscar & HIMA</span>
-                    {files.bukti_sosmed
-                      ? <span className="text-[#00ffc8] text-[12px] block truncate mt-0.5">{files.bukti_sosmed.name}</span>
-                      : <span className="text-[#8B9A7A] text-[12px] block mt-0.5">Format JPG/PNG, maks 500KB</span>
-                    }
-                  </div>
-                  <input type="file" className="sr-only" accept=".jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange('bukti_sosmed', e.target.files?.[0])} />
-                </label>
-              </div>
+                );
+              })}
+
+
 
             </div>
 
@@ -519,7 +692,7 @@ export default function FormDaftarPage() {
               </Button>
               <Button
                 variant="solid"
-                disabled={!files.bukti_transfer || !files.bukti_sosmed}
+                disabled={!isFormValid()}
                 onClick={handleRegistrationSubmit}
                 loading={isSubmitting}
                 className="bg-[#00ffc8] hover:bg-[#00e6b5] text-[#020a06] font-bold rounded-xl px-6.5 py-3.5 flex items-center gap-1.5 shadow-[0_0_20px_rgba(0,255,200,0.4)] transition-all font-mono"
@@ -532,38 +705,7 @@ export default function FormDaftarPage() {
 
       </div>
 
-      {/* Bottom Category Quick-Select Cards (Only on Stage 1) */}
-      {step === 1 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fade">
-          {[
-            { name: 'Web Dev', icon: Laptop, keys: ['web', 'development'] },
-            { name: 'UI/UX Design', icon: Paintbrush, keys: ['poster', 'infografis', 'desain'] },
-            { name: 'CTF', icon: Terminal, keys: ['ctf'] }
-          ].map((cat, i) => {
-            const isSelected = selectedLomba?.nama?.toLowerCase().includes(cat.keys[0]) || selectedLomba?.slug?.includes(cat.keys[0]);
-            return (
-              <div 
-                key={i}
-                onClick={() => selectLombaBySlug(cat.keys)}
-                className={`p-5 rounded-2xl bg-white/[0.01] backdrop-blur-[25px] border cursor-pointer flex items-center gap-4 transition-all duration-300 ${
-                  isSelected 
-                    ? 'border-[#00ffc8] bg-[#00ffc8]/5 shadow-[0_0_15px_rgba(0,255,200,0.1)]' 
-                    : 'border-white/[0.04] hover:border-white/[0.08] hover:bg-white/[0.02]'
-                }`}
-              >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-                  isSelected ? 'bg-[#00ffc8]/20 text-[#00ffc8]' : 'bg-white/5 text-[#8B9A7A]'
-                }`}>
-                  <cat.icon size={18} />
-                </div>
-                <span className={`font-display text-sm font-bold transition-colors ${isSelected ? 'text-[#00ffc8]' : 'text-white'}`}>
-                  {cat.name}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+
 
     </div>
   );

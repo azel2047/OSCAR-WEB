@@ -183,6 +183,7 @@ class LombaResource extends Resource
                                             })
                                             ->maxLength(255),
                                     ]),
+
                                 Forms\Components\Select::make('mitra')
                                     ->multiple()
                                     ->relationship('mitra', 'nama')

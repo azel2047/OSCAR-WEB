@@ -4,13 +4,21 @@ import useAuthStore from '@/stores/authStore';
 import usePendaftaranStore from '@/stores/pendaftaranStore';
 import useLombaStore from '@/stores/lombaStore';
 import Input from '@/components/ui/Input';
+import api from '@/api/axios';
 import Button from '@/components/ui/Button';
 import { 
   CheckCircle, ChevronRight, ChevronLeft, Upload, Info, 
   Clock, AlertCircle, Shield, Check, ExternalLink, 
-  MessageSquare, ArrowLeft, Trophy, Sparkles, Laptop, Paintbrush, Terminal
+  MessageSquare, ArrowLeft, Trophy, Sparkles, Laptop, Paintbrush, Terminal,
+  Edit3, Users, Award, Github, FileText, Phone, Mail
 } from 'lucide-react';
 import gsap from '@/animations/gsapConfig';
+
+const extractUrl = (text) => {
+  if (!text) return null;
+  const match = text.match(/https?:\/\/[^\s]+/g);
+  return match ? match[0] : null;
+};
 
 const INPUT_CLASS = "!border-0 !rounded-xl bg-white/[0.02] hover:bg-white/[0.04] focus:bg-white/[0.06] focus:ring-1 focus:ring-[#00ffc8]/50 focus:shadow-[0_0_15px_rgba(0,255,200,0.15)] transition-all duration-300 outline-none text-white placeholder:text-[#8B9A7A]";
 
@@ -28,10 +36,16 @@ export default function PesertaDashboardPage() {
   const { lombaList, fetchLomba } = useLombaStore();
   const containerRef = useRef(null);
 
+  // Active Pendaftaran (Moved to top to prevent Temporal Dead Zone errors)
+  const activeRegistration = daftarList[0];
+
   // Form registration state
   const [step, setStep] = useState(1);
   const [isSuccessScreen, setIsSuccessScreen] = useState(false);
   const [showRevisionForm, setShowRevisionForm] = useState(false);
+  const [showAnggota2, setShowAnggota2] = useState(false);
+  const [showAnggota3, setShowAnggota3] = useState(false);
+  const [showKaryaAnggota2, setShowKaryaAnggota2] = useState(false);
 
   // Form Fields
   const [formData, setFormData] = useState({
@@ -50,18 +64,183 @@ export default function PesertaDashboardPage() {
 
   // Files State
   const [files, setFiles] = useState({
-    bukti_transfer: null,
-    bukti_sosmed: null,
-    bukti_sosmed_hima: null,
-    bukti_twibbon: null,
-    bukti_follow_medpart: null,
-    bukti_follow_sponsor: null
+    bukti_transfer: null
   });
+  const [syaratList, setSyaratList] = useState([]);
+
+  // Project Submission Inline States
+  const [pengumpulan, setPengumpulan] = useState(null);
+  const [isEditingKarya, setIsEditingKarya] = useState(false);
+  const [isSubmittingKarya, setIsSubmittingKarya] = useState(false);
+  const [karyaError, setKaryaError] = useState('');
+  const [karyaSuccess, setKaryaSuccess] = useState('');
+  const [karyaForm, setKaryaForm] = useState({
+    email: '',
+    no_hp: '',
+    tema_lomba: '',
+    nama_kelompok: '',
+    nama_pendamping: '',
+    nama_peserta_1: '',
+    nama_peserta_2: '',
+    link_github: '',
+    folder_proposal: '',
+    nama_peserta: '',
+    nama_sekolah: '',
+    link_karya_gdrive: ''
+  });
+  const [buktiInstagram, setBuktiInstagram] = useState(null);
+  const [buktiInstagramPreview, setBuktiInstagramPreview] = useState('');
 
   useEffect(() => {
     fetchMyPendaftaran();
     fetchLomba();
+    const fetchSyarat = async () => {
+      try {
+        const response = await api.get('/syarat-berkas');
+        setSyaratList(response.data.data);
+      } catch (err) {
+        console.error('Error fetching syarat berkas:', err);
+      }
+    };
+    fetchSyarat();
   }, []);
+
+  // Prefill toggle states when data is loaded
+  useEffect(() => {
+    if (formData.nama_peserta_2) setShowAnggota2(true);
+    if (formData.nama_peserta_3) setShowAnggota3(true);
+  }, [formData.nama_peserta_2, formData.nama_peserta_3]);
+
+  useEffect(() => {
+    if (karyaForm.nama_peserta_2) setShowKaryaAnggota2(true);
+  }, [karyaForm.nama_peserta_2]);
+
+  useEffect(() => {
+    if (activeRegistration && activeRegistration.status === 'diverifikasi') {
+      const fetchSubmission = async () => {
+        try {
+          const { data } = await api.get(`/pengumpulan/saya?pendaftaran_id=${activeRegistration.id}`);
+          const p = data.data?.pengumpulan;
+          setPengumpulan(p);
+          
+          if (p) {
+            setKaryaForm({
+              email: p.email || '',
+              no_hp: p.no_hp || '',
+              tema_lomba: p.tema_lomba || '',
+              nama_kelompok: p.data_karya?.nama_kelompok || '',
+              nama_pendamping: p.data_karya?.nama_pendamping || '',
+              nama_peserta_1: p.data_karya?.nama_peserta_1 || '',
+              nama_peserta_2: p.data_karya?.nama_peserta_2 || '',
+              link_github: p.data_karya?.link_github || '',
+              folder_proposal: p.data_karya?.folder_proposal || '',
+              nama_peserta: p.data_karya?.nama_peserta || '',
+              nama_sekolah: p.data_karya?.nama_sekolah || '',
+              link_karya_gdrive: p.data_karya?.link_karya_gdrive || ''
+            });
+            if (p.file_screenshot) {
+              setBuktiInstagramPreview(p.file_screenshot);
+            }
+            setIsEditingKarya(false);
+          } else {
+            const regData = activeRegistration.data_peserta || {};
+            setKaryaForm({
+              email: user?.email || '',
+              no_hp: regData.no_wa || '',
+              tema_lomba: regData.tema || '',
+              nama_kelompok: regData.nama_kelompok || '',
+              nama_pendamping: regData.nama_pendamping || '',
+              nama_peserta_1: regData.nama_peserta_1 || user?.nama || '',
+              nama_peserta_2: regData.nama_peserta_2 || '',
+              link_github: '',
+              folder_proposal: '',
+              nama_peserta: regData.nama_peserta_1 || user?.nama || '',
+              nama_sekolah: regData.asal_sekolah || '',
+              link_karya_gdrive: ''
+            });
+            setIsEditingKarya(true);
+          }
+        } catch (err) {
+          // Ignore
+        }
+      };
+      fetchSubmission();
+    }
+  }, [activeRegistration]);
+
+  const handleKaryaTextChange = (e) => {
+    setKaryaForm(p => ({ ...p, [e.target.name]: e.target.value }));
+  };
+
+  const handleKaryaFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 500 * 1024) {
+      setKaryaError('Ukuran file tidak boleh melebihi 500 KB.');
+      e.target.value = '';
+      setBuktiInstagram(null);
+      setBuktiInstagramPreview(pengumpulan?.file_screenshot || '');
+      return;
+    }
+
+    setKaryaError('');
+    setBuktiInstagram(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setBuktiInstagramPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleKaryaSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmittingKarya(true);
+    setKaryaError('');
+    setKaryaSuccess('');
+
+    const fd = new FormData();
+    fd.append('pendaftaran_id', activeRegistration.id);
+    fd.append('email', karyaForm.email);
+    fd.append('no_hp', karyaForm.no_hp);
+    fd.append('tema_lomba', karyaForm.tema_lomba);
+
+    const lomba = activeRegistration.lomba;
+    const isWebDev = lomba?.slug === 'web-development' || lomba?.nama?.toLowerCase().includes('web');
+
+    if (isWebDev) {
+      fd.append('nama_kelompok', karyaForm.nama_kelompok);
+      fd.append('nama_pendamping', karyaForm.nama_pendamping);
+      fd.append('nama_peserta_1', karyaForm.nama_peserta_1);
+      fd.append('nama_peserta_2', karyaForm.nama_peserta_2);
+      fd.append('link_github', karyaForm.link_github);
+      fd.append('folder_proposal', karyaForm.folder_proposal);
+    } else {
+      fd.append('nama_peserta', karyaForm.nama_peserta);
+      fd.append('nama_sekolah', karyaForm.nama_sekolah);
+      fd.append('link_karya_gdrive', karyaForm.link_karya_gdrive);
+      if (buktiInstagram) {
+        fd.append('bukti_instagram', buktiInstagram);
+      }
+    }
+
+    try {
+      const { data } = await api.post('/pengumpulan', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setKaryaSuccess(data.message || 'Karya berhasil dikumpulkan!');
+      setPengumpulan(data.data);
+      setIsEditingKarya(false);
+      
+      // Refresh submission data
+      const { data: refreshed } = await api.get(`/pengumpulan/saya?pendaftaran_id=${activeRegistration.id}`);
+      setPengumpulan(refreshed.data?.pengumpulan);
+    } catch (err) {
+      setKaryaError(err.userMessage || 'Gagal mengirimkan karya. Silakan coba lagi.');
+    } finally {
+      setIsSubmittingKarya(false);
+    }
+  };
 
   // GSAP Entrance Animations
   useEffect(() => {
@@ -152,16 +331,37 @@ export default function PesertaDashboardPage() {
 
 
     if (files.bukti_transfer) fd.append('bukti_transfer', files.bukti_transfer);
-    if (files.bukti_sosmed) fd.append('bukti_sosmed', files.bukti_sosmed);
-    if (files.bukti_sosmed_hima) fd.append('bukti_sosmed_hima', files.bukti_sosmed_hima);
-    if (files.bukti_twibbon) fd.append('bukti_twibbon', files.bukti_twibbon);
-    if (files.bukti_follow_medpart) fd.append('bukti_follow_medpart', files.bukti_follow_medpart);
-    if (files.bukti_follow_sponsor) fd.append('bukti_follow_sponsor', files.bukti_follow_sponsor);
+
+
+    syaratList.forEach(syarat => {
+      const fileKey = `bukti_${syarat.key}`;
+      if (files[fileKey]) {
+        fd.append(fileKey, files[fileKey]);
+      }
+    });
 
     const res = await submitPendaftaran(fd);
     if (res.success) {
       setIsSuccessScreen(true);
     }
+  };
+
+  const isRegistrationFilesValid = () => {
+    if (!files.bukti_transfer) return false;
+    for (const syarat of syaratList) {
+      if (syarat.is_required && !files[`bukti_${syarat.key}`]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const isRevisionFilesValid = () => {
+    if (files.bukti_transfer) return true;
+    for (const syarat of syaratList) {
+      if (files[`bukti_${syarat.key}`]) return true;
+    }
+    return false;
   };
 
   // Submit Revision
@@ -171,11 +371,14 @@ export default function PesertaDashboardPage() {
 
     const fd = new FormData();
     if (files.bukti_transfer) fd.append('bukti_transfer', files.bukti_transfer);
-    if (files.bukti_sosmed) fd.append('bukti_sosmed', files.bukti_sosmed);
-    if (files.bukti_sosmed_hima) fd.append('bukti_sosmed_hima', files.bukti_sosmed_hima);
-    if (files.bukti_twibbon) fd.append('bukti_twibbon', files.bukti_twibbon);
-    if (files.bukti_follow_medpart) fd.append('bukti_follow_medpart', files.bukti_follow_medpart);
-    if (files.bukti_follow_sponsor) fd.append('bukti_follow_sponsor', files.bukti_follow_sponsor);
+
+
+    syaratList.forEach(syarat => {
+      const fileKey = `bukti_${syarat.key}`;
+      if (files[fileKey]) {
+        fd.append(fileKey, files[fileKey]);
+      }
+    });
 
     const res = await revisi(activeRegistration.id, fd);
     if (res.success) {
@@ -185,14 +388,7 @@ export default function PesertaDashboardPage() {
   };
 
   // Quick select category from bottom cards
-  const selectLombaBySlug = (slugKeywords) => {
-    const match = lombaList.find(l => 
-      slugKeywords.some(kw => l.slug?.includes(kw) || l.nama?.toLowerCase().includes(kw))
-    );
-    if (match) {
-      setFormData(p => ({ ...p, lomba_id: match.id }));
-    }
-  };
+
 
   // Switch display based on load & active registrations
   if (isLoading) {
@@ -204,8 +400,7 @@ export default function PesertaDashboardPage() {
     );
   }
 
-  // Active Pendaftaran
-  const activeRegistration = daftarList[0];
+  // Active Pendaftaran (Already declared at the top)
 
   // ==========================================
   // CASE 1: VERIFIED STATE (DIVERIFIKASI)
@@ -250,7 +445,10 @@ export default function PesertaDashboardPage() {
             </div>
             
             <a 
-              href="https://chat.whatsapp.com/demo-oscar-group" 
+              href={
+                extractUrl(activeRegistration?.catatan_admin) || 
+                'https://chat.whatsapp.com/DQXpVKrkAeF7lUTMUtnWvz'
+              } 
               target="_blank" 
               rel="noopener noreferrer"
               className="block mt-6"
@@ -309,6 +507,405 @@ export default function PesertaDashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Inline Pengumpulan Karya Section */}
+        {(() => {
+          const lomba = activeRegistration.lomba;
+          const isWebDev = lomba?.slug === 'web-development' || lomba?.nama?.toLowerCase().includes('web');
+          const isPosterOrInfo = ['desain-poster', 'desain-infografis'].includes(lomba?.slug) || 
+                                lomba?.nama?.toLowerCase().includes('poster') || 
+                                lomba?.nama?.toLowerCase().includes('infografis');
+
+          if (!isWebDev && !isPosterOrInfo) {
+            return (
+              <div className="bg-white/[0.01] backdrop-blur-[35px] border border-white/[0.04] rounded-3xl p-6 sm:p-8 space-y-4">
+                <h3 className="font-display font-bold text-white text-base flex items-center gap-2">
+                  <Trophy size={18} className="text-[#00ffc8]" />
+                  Pengumpulan Karya / Project
+                </h3>
+                <p className="text-[#8B9A7A] text-xs leading-relaxed">
+                  Cabang lomba Anda (<strong>{lomba?.nama || 'CTF'}</strong>) tidak memerlukan pengumpulan berkas/karya melalui portal web ini. Silakan ikuti instruksi pelaksanaan yang dibagikan di grup koordinasi.
+                </p>
+              </div>
+            );
+          }
+
+          return (
+            <div className="space-y-6">
+              {/* Header Status */}
+              <div className="bg-white/[0.01] backdrop-blur-[35px] border border-white/[0.04] rounded-3xl p-6 sm:p-8 space-y-4 relative overflow-hidden">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <h3 className="font-display font-bold text-white text-base flex items-center gap-2">
+                      <Upload size={18} className="text-[#00ffc8]" />
+                      Pengumpulan Karya / Project
+                    </h3>
+                    <p className="text-[#8B9A7A] text-xs">
+                      Lengkapi data karya/project lomba Anda langsung di bawah ini.
+                    </p>
+                  </div>
+                  {pengumpulan ? (
+                    <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/10 border border-emerald-500/30 text-[#00ffc8] shadow-[0_0_10px_rgba(16,185,129,0.15)] flex items-center gap-1.5 w-fit">
+                      <Check size={12} strokeWidth={2.5} /> Selesai Dikumpulkan
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.15)] flex items-center gap-1.5 w-fit animate-pulse">
+                      <Clock size={12} /> Menunggu Pengumpulan
+                    </span>
+                  )}
+                </div>
+
+                {karyaError && (
+                  <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-start gap-2.5 shadow-[0_0_15px_rgba(239,68,68,0.05)]">
+                    <AlertCircle size={16} className="mt-0.5 flex-shrink-0 animate-pulse" />
+                    <span>{karyaError}</span>
+                  </div>
+                )}
+                {karyaSuccess && (
+                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-[#00ffc8] text-xs flex items-start gap-2.5 shadow-[0_0_15px_rgba(16,185,129,0.05)]">
+                    <CheckCircle size={16} className="mt-0.5 flex-shrink-0" />
+                    <span>{karyaSuccess}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* RENDER VIEW MODE */}
+              {!isEditingKarya && pengumpulan && (
+                <div className="bg-white/[0.01] backdrop-blur-[35px] border border-white/[0.04] shadow-[0_30px_60px_rgba(0,0,0,0.7)] rounded-3xl p-6 sm:p-8 space-y-6">
+                  <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                    <h4 className="font-display font-bold text-white text-xs uppercase tracking-widest">Detail Karya yang Dikumpulkan</h4>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setIsEditingKarya(true)}
+                      className="border border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 rounded-xl text-xs py-2 px-4 font-bold uppercase tracking-wider flex items-center gap-1.5"
+                    >
+                      <Edit3 size={12} /> Perbarui Karya
+                    </Button>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-6 text-xs">
+                    <div className="space-y-1">
+                      <span className="text-[#8B9A7A] block font-mono uppercase tracking-wider text-[10px]"><Mail size={10} className="inline mr-1" /> Email Pengirim</span>
+                      <span className="text-white font-semibold text-sm">{pengumpulan.email}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[#8B9A7A] block font-mono uppercase tracking-wider text-[10px]"><Phone size={10} className="inline mr-1" /> No. HP Peserta</span>
+                      <span className="text-white font-semibold text-sm">{pengumpulan.no_hp}</span>
+                    </div>
+                    <div className="sm:col-span-2 space-y-1">
+                      <span className="text-[#8B9A7A] block font-mono uppercase tracking-wider text-[10px]"><Award size={10} className="inline mr-1" /> Tema Karya yang Diikuti</span>
+                      <span className="text-white font-semibold text-sm">{pengumpulan.tema_lomba}</span>
+                    </div>
+
+                    {isWebDev && (
+                      <>
+                        <div className="space-y-1">
+                          <span className="text-[#8B9A7A] block font-mono uppercase tracking-wider text-[10px]"><Users size={10} className="inline mr-1" /> Nama Kelompok</span>
+                          <span className="text-white font-semibold text-sm">{pengumpulan.data_karya?.nama_kelompok || '-'}</span>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[#8B9A7A] block font-mono uppercase tracking-wider text-[10px]"><User size={10} className="inline mr-1" /> Nama Pendamping</span>
+                          <span className="text-white font-semibold text-sm">{pengumpulan.data_karya?.nama_pendamping || '-'}</span>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[#8B9A7A] block font-mono uppercase tracking-wider text-[10px]"><User size={10} className="inline mr-1" /> Nama Peserta 1</span>
+                          <span className="text-white font-semibold text-sm">{pengumpulan.data_karya?.nama_peserta_1 || '-'}</span>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[#8B9A7A] block font-mono uppercase tracking-wider text-[10px]"><User size={10} className="inline mr-1" /> Nama Peserta 2</span>
+                          <span className="text-white font-semibold text-sm">{pengumpulan.data_karya?.nama_peserta_2 || '-'}</span>
+                        </div>
+                        <div className="sm:col-span-2 space-y-1.5">
+                          <span className="text-[#8B9A7A] block font-mono uppercase tracking-wider text-[10px]"><Github size={10} className="inline mr-1" /> Link Repositori GitHub</span>
+                          <a href={pengumpulan.data_karya?.link_github} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-[#00ffc8]/50 hover:bg-white/[0.04] transition-all text-[#00ffc8] text-xs font-semibold">
+                            <span className="truncate flex-1">{pengumpulan.data_karya?.link_github}</span>
+                            <ExternalLink size={12} className="opacity-60 ml-2" />
+                          </a>
+                        </div>
+                        <div className="sm:col-span-2 space-y-1.5">
+                          <span className="text-[#8B9A7A] block font-mono uppercase tracking-wider text-[10px]"><FileText size={10} className="inline mr-1" /> Folder Proposal Lomba</span>
+                          <a href={pengumpulan.data_karya?.folder_proposal} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-[#00ffc8]/50 hover:bg-white/[0.04] transition-all text-[#00ffc8] text-xs font-semibold">
+                            <span className="truncate flex-1">{pengumpulan.data_karya?.folder_proposal}</span>
+                            <ExternalLink size={12} className="opacity-60 ml-2" />
+                          </a>
+                        </div>
+                      </>
+                    )}
+
+                    {isPosterOrInfo && (
+                      <>
+                        <div className="space-y-1">
+                          <span className="text-[#8B9A7A] block font-mono uppercase tracking-wider text-[10px]"><User size={10} className="inline mr-1" /> Nama Peserta</span>
+                          <span className="text-white font-semibold text-sm">{pengumpulan.data_karya?.nama_peserta || '-'}</span>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[#8B9A7A] block font-mono uppercase tracking-wider text-[10px]"><FileText size={10} className="inline mr-1" /> Nama Sekolah</span>
+                          <span className="text-white font-semibold text-sm">{pengumpulan.data_karya?.nama_sekolah || '-'}</span>
+                        </div>
+                        <div className="sm:col-span-2 space-y-1.5">
+                          <span className="text-[#8B9A7A] block font-mono uppercase tracking-wider text-[10px]"><ExternalLink size={10} className="inline mr-1" /> Link Google Drive Karya (JPG/IMG 300dpi + PDF)</span>
+                          <a href={pengumpulan.data_karya?.link_karya_gdrive} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-[#00ffc8]/50 hover:bg-white/[0.04] transition-all text-[#00ffc8] text-xs font-semibold">
+                            <span className="truncate flex-1">{pengumpulan.data_karya?.link_karya_gdrive}</span>
+                            <ExternalLink size={12} className="opacity-60 ml-2" />
+                          </a>
+                        </div>
+                        <div className="sm:col-span-2 space-y-2">
+                          <span className="text-[#8B9A7A] block font-mono uppercase tracking-wider text-[10px]">Bukti Screenshot Upload Instagram</span>
+                          {pengumpulan.file_screenshot ? (
+                            <div className="relative group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.01] hover:border-white/20 transition-all p-3 max-w-[280px]">
+                              <a href={pengumpulan.file_screenshot} target="_blank" rel="noopener noreferrer" className="block cursor-zoom-in relative">
+                                <img src={pengumpulan.file_screenshot} alt="Screenshot Instagram" className="w-full h-auto rounded-xl object-contain" />
+                              </a>
+                            </div>
+                          ) : (
+                            <p className="text-[#8B9A7A] text-xs italic">Belum diunggah</p>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* RENDER FORM MODE */}
+              {isEditingKarya && (
+                <form onSubmit={handleKaryaSubmit} className="bg-white/[0.01] backdrop-blur-[35px] border border-white/[0.04] shadow-[0_30px_60px_rgba(0,0,0,0.8)] rounded-3xl p-6 sm:p-8 space-y-6">
+                  <div className="grid sm:grid-cols-2 gap-5">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Alamat Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={karyaForm.email}
+                        onChange={handleKaryaTextChange}
+                        placeholder="Masukkan email kelompok/pengirim"
+                        className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Nomor HP Peserta</label>
+                      <input
+                        type="text"
+                        name="no_hp"
+                        value={karyaForm.no_hp}
+                        onChange={handleKaryaTextChange}
+                        placeholder="Contoh: 0812XXXXXXXX"
+                        className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
+                        required
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2 space-y-1">
+                      <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Tema Lomba yang Diikuti</label>
+                      <select
+                        name="tema_lomba"
+                        value={karyaForm.tema_lomba}
+                        onChange={handleKaryaTextChange}
+                        className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs"
+                        required
+                      >
+                        <option value="" className="bg-[#0A1A0A] text-[#8B9A7A]">Pilih Tema Karya</option>
+                        {getTemaOptions(lomba.slug, lomba.nama).map((t, idx) => (
+                          <option key={idx} value={t} className="bg-[#0D1E0D] text-white text-xs">{t}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {isWebDev && (
+                      <>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Nama Kelompok</label>
+                          <input
+                            type="text"
+                            name="nama_kelompok"
+                            value={karyaForm.nama_kelompok}
+                            onChange={handleKaryaTextChange}
+                            placeholder="Masukkan Nama Kelompok"
+                            className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Nama Pendamping</label>
+                          <input
+                            type="text"
+                            name="nama_pendamping"
+                            value={karyaForm.nama_pendamping}
+                            onChange={handleKaryaTextChange}
+                            placeholder="Nama Pendamping"
+                            className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Nama Peserta 1 (Ketua)</label>
+                          <input
+                            type="text"
+                            name="nama_peserta_1"
+                            value={karyaForm.nama_peserta_1}
+                            onChange={handleKaryaTextChange}
+                            placeholder="Nama lengkap Ketua"
+                            className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
+                            required
+                          />
+                        </div>
+                        {showKaryaAnggota2 ? (
+                          <div className="space-y-1 relative">
+                            <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Nama Peserta 2 (Anggota)</label>
+                            <input
+                              type="text"
+                              name="nama_peserta_2"
+                              value={karyaForm.nama_peserta_2}
+                              onChange={handleKaryaTextChange}
+                              placeholder="Nama lengkap Anggota"
+                              className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowKaryaAnggota2(false);
+                                setKaryaForm(p => ({ ...p, nama_peserta_2: '' }));
+                              }}
+                              className="absolute right-0 top-0 text-[9px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
+                            >
+                              [ Hapus ]
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col justify-end">
+                            <button
+                              type="button"
+                              onClick={() => setShowKaryaAnggota2(true)}
+                              className="w-full py-3 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+                            >
+                              + Tambah Anggota 2
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="sm:col-span-2 space-y-1">
+                          <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Tautan (URL) Repositori GitHub</label>
+                          <input
+                            type="url"
+                            name="link_github"
+                            value={karyaForm.link_github}
+                            onChange={handleKaryaTextChange}
+                            placeholder="https://github.com/username/project-name"
+                            className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
+                            required
+                          />
+                        </div>
+
+                        <div className="sm:col-span-2 space-y-1">
+                          <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Tautan (URL) Folder Proposal Lomba</label>
+                          <input
+                            type="text"
+                            name="folder_proposal"
+                            value={karyaForm.folder_proposal}
+                            onChange={handleKaryaTextChange}
+                            placeholder="Tautan Google Drive / Cloud storage berisi file proposal"
+                            className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
+                            required
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {isPosterOrInfo && (
+                      <>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Nama Peserta</label>
+                          <input
+                            type="text"
+                            name="nama_peserta"
+                            value={karyaForm.nama_peserta}
+                            onChange={handleKaryaTextChange}
+                            placeholder="Nama lengkap peserta"
+                            className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Nama Sekolah</label>
+                          <input
+                            type="text"
+                            name="nama_sekolah"
+                            value={karyaForm.nama_sekolah}
+                            onChange={handleKaryaTextChange}
+                            placeholder="Nama Asal Sekolah / Institusi"
+                            className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
+                            required
+                          />
+                        </div>
+
+                        <div className="sm:col-span-2 space-y-1">
+                          <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Tautan Google Drive Karya (JPG/IMG 300dpi + PDF)</label>
+                          <input
+                            type="url"
+                            name="link_karya_gdrive"
+                            value={karyaForm.link_karya_gdrive}
+                            onChange={handleKaryaTextChange}
+                            placeholder="https://drive.google.com/drive/folders/..."
+                            className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
+                            required
+                          />
+                        </div>
+
+                        <div className="sm:col-span-2 space-y-2">
+                          <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Bukti Screenshot Upload Instagram</label>
+                          <div className="flex flex-col sm:flex-row gap-4 items-start">
+                            <label className="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-dashed border-white/10 hover:border-[#00ffc8]/50 cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] w-full sm:max-w-[220px] h-[120px]">
+                              <div className="flex flex-col items-center justify-center gap-1.5 text-center">
+                                <Upload size={20} className="text-[#00ffc8] animate-pulse" />
+                                <span className="text-white text-[11px] font-semibold">Pilih Berkas Screenshot</span>
+                                <span className="text-[9px] text-[#8B9A7A]">Format JPG/PNG, maks 500 KB</span>
+                              </div>
+                              <input
+                                type="file"
+                                className="sr-only"
+                                accept="image/jpeg,image/jpg,image/png"
+                                onChange={handleKaryaFileChange}
+                                required={!pengumpulan}
+                              />
+                            </label>
+
+                            {buktiInstagramPreview && (
+                              <div className="relative group overflow-hidden rounded-xl border border-white/10 bg-white/[0.01] p-1.5 max-w-[150px]">
+                                <img src={buktiInstagramPreview} alt="Preview" className="w-full max-h-[100px] rounded-lg object-contain" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-4 pt-4 border-t border-white/5">
+                    {pengumpulan && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setIsEditingKarya(false)}
+                        className="flex-1 justify-center border border-white/10 text-white rounded-xl hover:bg-white/5 py-2.5 text-xs font-bold uppercase tracking-wider"
+                      >
+                        Batal
+                      </Button>
+                    )}
+                    <Button
+                      type="submit"
+                      variant="solid"
+                      loading={isSubmittingKarya}
+                      className="flex-1 bg-[#00ffc8] hover:bg-[#00e6b5] text-[#020a06] font-bold rounded-xl py-3 flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(0,255,200,0.3)] transition-all text-xs uppercase tracking-wider"
+                    >
+                      {pengumpulan ? 'Simpan Perubahan' : 'Kumpulkan Karya'}
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Progress Registrasi */}
         <div className="bg-white/[0.01] backdrop-blur-[35px] border border-white/[0.04] rounded-3xl p-6">
@@ -389,7 +986,13 @@ export default function PesertaDashboardPage() {
               <Button 
                 variant="solid" 
                 onClick={() => {
-                  setFiles({ bukti_transfer: null, bukti_sosmed: null });
+                  const initialFiles = { 
+                    bukti_transfer: null,
+                  };
+                  syaratList.forEach(s => {
+                    initialFiles[`bukti_${s.key}`] = null;
+                  });
+                  setFiles(initialFiles);
                   setShowRevisionForm(true);
                 }}
                 className="flex-1 bg-[#00ffc8] hover:bg-[#00e6b5] text-[#020a06] font-bold rounded-xl py-3 text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(0,255,200,0.2)]"
@@ -461,30 +1064,72 @@ export default function PesertaDashboardPage() {
                 </label>
               </div>
 
-              {/* Bukti Sosmed */}
-              <div className="space-y-2">
-                <label className="font-display text-[12px] font-bold tracking-widest uppercase text-[#8B9A7A]">Bukti Follow Instagram / Twibbon</label>
-                <label className="flex items-center gap-4 p-5 rounded-xl border border-dashed border-white/10 hover:border-[#00ffc8]/50 cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] duration-300">
-                  <div className="w-10 h-10 rounded-xl bg-[#00ffc8]/5 border border-[#00ffc8]/20 flex items-center justify-center flex-shrink-0">
-                    <Upload size={18} className="text-[#00ffc8]" />
+              {/* Dynamic Syarat Berkas */}
+              {syaratList.map((syarat) => {
+                const fileKey = `bukti_${syarat.key}`;
+                const file = files[fileKey];
+                return (
+                  <div key={syarat.id} className="space-y-2">
+                    <label className="font-display text-[12px] font-bold tracking-widest uppercase text-[#8B9A7A]">
+                      {syarat.nama} {syarat.is_required && <span className="text-red-400">*</span>}
+                    </label>
+                    <label className="flex items-center gap-4 p-5 rounded-xl border border-dashed border-white/10 hover:border-[#00ffc8]/50 cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] duration-300">
+                      <div className="w-10 h-10 rounded-xl bg-[#00ffc8]/5 border border-[#00ffc8]/20 flex items-center justify-center flex-shrink-0">
+                        <Upload size={18} className="text-[#00ffc8]" />
+                      </div>
+                      <div className="flex-1 min-w-0 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          {file
+                            ? <span className="text-[#00ffc8] text-sm font-semibold truncate block">{file.name}</span>
+                            : <span className="text-[#8B9A7A] text-xs block">
+                                {syarat.deskripsi || 'Format JPG/PNG/PDF, maks 1MB'}
+                              </span>
+                          }
+                        </div>
+                        <div className="flex gap-2">
+                          {syarat.file_template_url && (
+                            <a
+                              href={syarat.file_template_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="px-3 py-1.5 rounded-lg border border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/10 transition-all text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 whitespace-nowrap z-10"
+                            >
+                              <Upload size={12} className="rotate-180" /> Unduh Template
+                            </a>
+                          )}
+                          {syarat.url_target && (
+                            <a
+                              href={syarat.url_target}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="px-3 py-1.5 rounded-lg border border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/10 transition-all text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap z-10"
+                            >
+                              <ExternalLink size={12} /> Kunjungi
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      <input 
+                        type="file" 
+                        className="sr-only" 
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange(fileKey, e.target.files?.[0])} 
+                      />
+                    </label>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    {files.bukti_sosmed
-                      ? <span className="text-[#00ffc8] text-sm font-semibold truncate block">{files.bukti_sosmed.name}</span>
-                      : <span className="text-[#8B9A7A] text-xs block">Format JPG/PNG, maks 2MB</span>
-                    }
-                  </div>
-                  <input type="file" className="sr-only" accept=".jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange('bukti_sosmed', e.target.files?.[0])} />
-                </label>
-              </div>
+                );
+              })}
+
+
             </div>
 
             <Button 
               variant="solid" 
               onClick={handleRevisionSubmit}
               loading={isSubmitting}
-              disabled={!files.bukti_transfer && !files.bukti_sosmed}
+              disabled={!isRevisionFilesValid()}
               className="w-full bg-[#00ffc8] hover:bg-[#00e6b5] text-[#020a06] font-bold rounded-xl py-3.5 flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(0,255,200,0.3)] transition-all mt-4"
             >
               Kirim Perbaikan
@@ -833,26 +1478,73 @@ export default function PesertaDashboardPage() {
               />
 
               {!isPosterOrInfo && (
-                <Input
-                  label="NAMA ANGGOTA 2"
-                  name="nama_peserta_2"
-                  placeholder="Khusus Web Dev, CTF, UI/UX"
-                  value={formData.nama_peserta_2}
-                  onChange={handleTextChange}
-                  className={INPUT_CLASS}
-                  required={isWebDev}
-                />
+                showAnggota2 ? (
+                  <div className="relative">
+                    <Input
+                      label="NAMA ANGGOTA 2"
+                      name="nama_peserta_2"
+                      placeholder="Khusus Web Dev, CTF, UI/UX"
+                      value={formData.nama_peserta_2}
+                      onChange={handleTextChange}
+                      className={INPUT_CLASS}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAnggota2(false);
+                        setFormData(p => ({ ...p, nama_peserta_2: '' }));
+                      }}
+                      className="absolute right-0 top-0 text-[10px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
+                    >
+                      [ Hapus ]
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setShowAnggota2(true)}
+                      className="w-full py-3.5 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+                    >
+                      + Tambah Anggota 2
+                    </button>
+                  </div>
+                )
               )}
 
-              {isCTF && (
-                <Input
-                  label="NAMA ANGGOTA 3"
-                  name="nama_peserta_3"
-                  placeholder="Khusus CTF (Opsional)"
-                  value={formData.nama_peserta_3}
-                  onChange={handleTextChange}
-                  className={INPUT_CLASS}
-                />
+              {isCTF && showAnggota2 && (
+                showAnggota3 ? (
+                  <div className="relative">
+                    <Input
+                      label="NAMA ANGGOTA 3"
+                      name="nama_peserta_3"
+                      placeholder="Khusus CTF (Opsional)"
+                      value={formData.nama_peserta_3}
+                      onChange={handleTextChange}
+                      className={INPUT_CLASS}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAnggota3(false);
+                        setFormData(p => ({ ...p, nama_peserta_3: '' }));
+                      }}
+                      className="absolute right-0 top-0 text-[10px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
+                    >
+                      [ Hapus ]
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setShowAnggota3(true)}
+                      className="w-full py-3.5 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+                    >
+                      + Tambah Anggota 3
+                    </button>
+                  </div>
+                )
               )}
 
               <Input
@@ -919,7 +1611,7 @@ export default function PesertaDashboardPage() {
               </Button>
               <Button
                 variant="solid"
-                disabled={!formData.nama_peserta_1 || !formData.no_wa || !formData.tema || (isWebDev && (!formData.nama_peserta_2 || !formData.nama_pendamping || !formData.no_wa_pendamping))}
+                disabled={!formData.nama_peserta_1 || !formData.no_wa || !formData.tema || (isWebDev && ((showAnggota2 && !formData.nama_peserta_2) || !formData.nama_pendamping || !formData.no_wa_pendamping))}
                 onClick={() => setStep(3)}
                 className="bg-[#00ffc8] hover:bg-[#00e6b5] text-[#020a06] font-bold rounded-xl px-6.5 py-3.5 flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,255,200,0.2)] transition-all font-mono"
               >
@@ -991,95 +1683,65 @@ export default function PesertaDashboardPage() {
                 </label>
               </div>
 
-              {/* Bukti Instagram */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-white/10 hover:border-[#00ffc8]/50 cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] duration-300">
-                  <div className="w-9 h-9 rounded-lg bg-[#00ffc8]/5 border border-[#00ffc8]/20 flex items-center justify-center flex-shrink-0 text-[#00ffc8]">
-                    <Upload size={16} />
+              {/* Dynamic Syarat Berkas */}
+              {syaratList.map((syarat) => {
+                const fileKey = `bukti_${syarat.key}`;
+                const file = files[fileKey];
+                return (
+                  <div key={syarat.id} className="space-y-2">
+                    <label className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-white/10 hover:border-[#00ffc8]/50 cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] duration-300">
+                      <div className="w-9 h-9 rounded-lg bg-[#00ffc8]/5 border border-[#00ffc8]/20 flex items-center justify-center flex-shrink-0 text-[#00ffc8]">
+                        <Upload size={16} />
+                      </div>
+                      <div className="flex-1 min-w-0 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <span className="text-white text-xs font-semibold block truncate">
+                            {syarat.nama} {syarat.is_required && <span className="text-red-400">*</span>}
+                          </span>
+                          {file
+                            ? <span className="text-[#00ffc8] text-[12px] block truncate mt-0.5">{file.name}</span>
+                            : <span className="text-[#8B9A7A] text-[12px] block mt-0.5">
+                                {syarat.deskripsi || 'Format JPG/PNG/PDF, maks 500KB'}
+                              </span>
+                          }
+                        </div>
+                        <div className="flex gap-2">
+                          {syarat.file_template_url && (
+                            <a
+                              href={syarat.file_template_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="px-3 py-1.5 rounded-lg border border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/10 transition-all text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 whitespace-nowrap z-10"
+                            >
+                              <Upload size={12} className="rotate-180" /> Unduh Template
+                            </a>
+                          )}
+                          {syarat.url_target && (
+                            <a
+                              href={syarat.url_target}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="px-3 py-1.5 rounded-lg border border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/10 transition-all text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap z-10"
+                            >
+                              <ExternalLink size={12} /> Kunjungi
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      <input 
+                        type="file" 
+                        className="sr-only" 
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange(fileKey, e.target.files?.[0])} 
+                      />
+                    </label>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-white text-xs font-semibold block truncate">Bukti Follow Instagram Oscar 3.0</span>
-                    {files.bukti_sosmed
-                      ? <span className="text-[#00ffc8] text-[12px] block truncate mt-0.5">{files.bukti_sosmed.name}</span>
-                      : <span className="text-[#8B9A7A] text-[12px] block mt-0.5">Wajib Unggah Screenshot</span>
-                    }
-                  </div>
-                  <input type="file" className="sr-only" accept=".jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange('bukti_sosmed', e.target.files?.[0])} />
-                </label>
-              </div>
+                );
+              })}
 
-              {/* Bukti HIMA */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-white/10 hover:border-[#00ffc8]/50 cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] duration-300">
-                  <div className="w-9 h-9 rounded-lg bg-[#00ffc8]/5 border border-[#00ffc8]/20 flex items-center justify-center flex-shrink-0 text-[#00ffc8]">
-                    <Upload size={16} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-white text-xs font-semibold block truncate">Bukti Follow HIMA TI</span>
-                    {files.bukti_sosmed_hima
-                      ? <span className="text-[#00ffc8] text-[12px] block truncate mt-0.5">{files.bukti_sosmed_hima.name}</span>
-                      : <span className="text-[#8B9A7A] text-[12px] block mt-0.5">Wajib Unggah Screenshot</span>
-                    }
-                  </div>
-                  <input type="file" className="sr-only" accept=".jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange('bukti_sosmed_hima', e.target.files?.[0])} />
-                </label>
-              </div>
 
-              {/* Bukti Twibbon */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-white/10 hover:border-[#00ffc8]/50 cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] duration-300">
-                  <div className="w-9 h-9 rounded-lg bg-[#00ffc8]/5 border border-[#00ffc8]/20 flex items-center justify-center flex-shrink-0 text-[#00ffc8]">
-                    <Upload size={16} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-white text-xs font-semibold block truncate">Bukti Post Twibbon</span>
-                    {files.bukti_twibbon
-                      ? <span className="text-[#00ffc8] text-[12px] block truncate mt-0.5">{files.bukti_twibbon.name}</span>
-                      : <span className="text-[#8B9A7A] text-[12px] block mt-0.5">Link media sosial atau screenshot</span>
-                    }
-                  </div>
-                  <input type="file" className="sr-only" accept=".jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange('bukti_twibbon', e.target.files?.[0])} />
-                </label>
-              </div>
-
-              {/* Bukti Follow Media Partner */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-white/10 hover:border-[#00ffc8]/50 cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] duration-300">
-                  <div className="w-9 h-9 rounded-lg bg-[#00ffc8]/5 border border-[#00ffc8]/20 flex items-center justify-center flex-shrink-0 text-[#00ffc8]">
-                    <Upload size={16} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-white text-xs font-semibold block truncate">Bukti Follow Media Partner</span>
-                    {files.bukti_follow_medpart
-                      ? <span className="text-[#00ffc8] text-[12px] block truncate mt-0.5">{files.bukti_follow_medpart.name}</span>
-                      : <span className="text-[#8B9A7A] text-[12px] block mt-0.5">Wajib Unggah Screenshot</span>
-                    }
-                  </div>
-                  <input type="file" className="sr-only" accept=".jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange('bukti_follow_medpart', e.target.files?.[0])} />
-                </label>
-              </div>
-
-              {/* Bukti Follow Sponsor */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-white/10 hover:border-[#00ffc8]/50 cursor-pointer transition-all bg-white/[0.01] hover:bg-white/[0.03] duration-300">
-                  <div className="w-9 h-9 rounded-lg bg-[#00ffc8]/5 border border-[#00ffc8]/20 flex items-center justify-center flex-shrink-0 text-[#00ffc8]">
-                    <Upload size={16} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-white text-xs font-semibold block truncate">Bukti Follow Sponsor Resmi</span>
-                    {files.bukti_follow_sponsor
-                      ? <span className="text-[#00ffc8] text-[12px] block truncate mt-0.5">{files.bukti_follow_sponsor.name}</span>
-                      : <span className="text-[#8B9A7A] text-[12px] block mt-0.5">Wajib Unggah Screenshot</span>
-                    }
-                  </div>
-                  <input type="file" className="sr-only" accept=".jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange('bukti_follow_sponsor', e.target.files?.[0])} />
-                </label>
-              </div>
 
             </div>
 
@@ -1103,7 +1765,7 @@ export default function PesertaDashboardPage() {
               </Button>
               <Button
                 variant="solid"
-                disabled={!files.bukti_transfer || !files.bukti_sosmed}
+                disabled={!isRegistrationFilesValid()}
                 onClick={handleRegistrationSubmit}
                 loading={isSubmitting}
                 className="bg-[#00ffc8] hover:bg-[#00e6b5] text-[#020a06] font-bold rounded-xl px-6.5 py-3.5 flex items-center gap-1.5 shadow-[0_0_20px_rgba(0,255,200,0.4)] transition-all font-mono"
@@ -1116,38 +1778,7 @@ export default function PesertaDashboardPage() {
 
       </div>
 
-      {/* Bottom Category Quick-Select Cards (Only on Stage 1) */}
-      {step === 1 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fade">
-          {[
-            { name: 'Web Dev', icon: Laptop, keys: ['web', 'development'] },
-            { name: 'UI/UX Design', icon: Paintbrush, keys: ['poster', 'infografis', 'desain'] },
-            { name: 'CTF', icon: Terminal, keys: ['ctf'] }
-          ].map((cat, i) => {
-            const isSelected = selectedLomba?.nama?.toLowerCase().includes(cat.keys[0]) || selectedLomba?.slug?.includes(cat.keys[0]);
-            return (
-              <div 
-                key={i}
-                onClick={() => selectLombaBySlug(cat.keys)}
-                className={`p-5 rounded-2xl bg-white/[0.01] backdrop-blur-[25px] border cursor-pointer flex items-center gap-4 transition-all duration-300 ${
-                  isSelected 
-                    ? 'border-[#00ffc8] bg-[#00ffc8]/5 shadow-[0_0_15px_rgba(0,255,200,0.1)]' 
-                    : 'border-white/[0.04] hover:border-white/[0.08] hover:bg-white/[0.02]'
-                }`}
-              >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-                  isSelected ? 'bg-[#00ffc8]/20 text-[#00ffc8]' : 'bg-white/5 text-[#8B9A7A]'
-                }`}>
-                  <cat.icon size={18} />
-                </div>
-                <span className={`font-display text-sm font-bold transition-colors ${isSelected ? 'text-[#00ffc8]' : 'text-white'}`}>
-                  {cat.name}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+
 
     </div>
   );

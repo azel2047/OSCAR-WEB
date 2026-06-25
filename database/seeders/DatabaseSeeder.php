@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             TimelineSeeder::class,
             SeasonSeeder::class,
             ConfigSeeder::class,
+            SyaratBerkasSeeder::class,
         ]);
 
         if (app()->isLocal()) {

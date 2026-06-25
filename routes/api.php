@@ -5,7 +5,8 @@ use App\Http\Controllers\Api\{
     AuthController, LombaController, TimelineController,
     RoadmapController, MitraController, ConfigController,
     PendaftaranController, NotifikasiController,
-    PengumumanController, StatistikController
+    PengumumanController, StatistikController,
+    PengumpulanKaryaController, SyaratBerkasController
 };
 use App\Http\Controllers\Api\Admin\{
     AdminDashboardController, AdminLombaController,
@@ -44,6 +45,7 @@ Route::get('config/{key}',       [ConfigController::class, 'show']);
 Route::get('statistik/peta',     [StatistikController::class, 'peta']);
 Route::get('galeri',             [RoadmapController::class, 'allGaleriPublic']);
 Route::get('seasons',            [RoadmapController::class, 'seasonsOnly']);
+Route::get('syarat-berkas',      [SyaratBerkasController::class, 'index']);
 
 // ============================================================
 // AUTHENTICATED
@@ -64,6 +66,9 @@ Route::middleware(['auth:sanctum', 'role:peserta'])->group(function () {
     Route::get('notifikasi',                 [NotifikasiController::class, 'index']);
     Route::patch('notifikasi/{id}/baca',     [NotifikasiController::class, 'markRead']);
     Route::patch('notifikasi/baca-semua',    [NotifikasiController::class, 'markAllRead']);
+
+    Route::get('pengumpulan/saya',         [PengumpulanKaryaController::class, 'saya']);
+    Route::post('pengumpulan',             [PengumpulanKaryaController::class, 'store']);
 
     Route::get('pengumuman',                 [PengumumanController::class, 'indexPeserta']);
     Route::get('pengumuman/{id}',            [PengumumanController::class, 'showPeserta']);

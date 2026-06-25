@@ -27,6 +27,7 @@ class LombaResource extends JsonResource
             'status'      => $this->status,
             'booklet_url' => $this->booklet_url,
             'banner_url'  => $this->banner_url,
+            'surat_izin_url' => $this->surat_izin_url,
             'mitra'       => MitraResource::collection($this->whenLoaded('mitra')),
         ];
     }

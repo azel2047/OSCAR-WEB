@@ -26,7 +26,8 @@ class Lomba extends Model
         'kuota',
         'status',
         'booklet_path',
-        'banner_path'
+        'banner_path',
+        'surat_izin_path'
     ];
 
     protected $casts = [
@@ -37,6 +38,7 @@ class Lomba extends Model
         'terdaftar',
         'booklet_url',
         'banner_url',
+        'surat_izin_url',
     ];
 
     public function mitra(): BelongsToMany
@@ -78,6 +80,22 @@ class Lomba extends Model
         $supabaseUrl = rtrim(env('SUPABASE_URL'), '/');
         $bucket = env('SUPABASE_BUCKET_GALERI', 'galeri-season');
         return "{$supabaseUrl}/storage/v1/object/public/{$bucket}/{$this->booklet_path}";
+    }
+
+    public function getSuratIzinUrlAttribute(): ?string
+    {
+        if (empty($this->surat_izin_path)) {
+            return null;
+        }
+        if (str_starts_with($this->surat_izin_path, 'http://') || str_starts_with($this->surat_izin_path, 'https://')) {
+            return $this->surat_izin_path;
+        }
+        if (file_exists(public_path('storage/' . $this->surat_izin_path))) {
+            return asset('storage/' . $this->surat_izin_path);
+        }
+        $supabaseUrl = rtrim(env('SUPABASE_URL'), '/');
+        $bucket = env('SUPABASE_BUCKET_GALERI', 'galeri-season');
+        return "{$supabaseUrl}/storage/v1/object/public/{$bucket}/{$this->surat_izin_path}";
     }
 
     public function getBannerUrlAttribute(): ?string
