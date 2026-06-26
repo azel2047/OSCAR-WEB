@@ -21,9 +21,10 @@ export default function PublicLayout() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [pathname]);
 
-  // Redirect admin to dashboard instantly if they try to access public web pages
-  if (token && user && user.role === 'admin') {
-    return <Navigate to="/admin" replace />;
+  // Redirect admin/staff to backend dashboard instantly if they try to access public web pages
+  if (token && user && user.role !== 'peserta') {
+    window.location.href = '/admin';
+    return null;
   }
 
   return (

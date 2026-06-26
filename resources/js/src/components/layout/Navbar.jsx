@@ -46,7 +46,7 @@ export default function Navbar() {
   // ── Dynamic Navigation Links
   const hasRegistered = token && user && user.role === 'peserta' && daftarList && daftarList.length > 0;
   const dynamicPendaftaranPath = token && user
-    ? (user.role === 'admin' ? '/admin' : (hasRegistered ? '/peserta' : '/peserta/daftar'))
+    ? (user.role !== 'peserta' ? '/admin' : (hasRegistered ? '/peserta' : '/peserta/daftar'))
     : '/register';
 
   const navLinks = [
@@ -108,7 +108,7 @@ export default function Navbar() {
     navigate('/');
   };
 
-  const dashPath = user?.role === 'admin' ? '/admin' : '/peserta';
+  const dashPath = user?.role !== 'peserta' ? '/admin' : '/peserta';
 
   return (
     <>
@@ -234,7 +234,7 @@ export default function Navbar() {
                           </div>
 
                           <div className="py-1.5">
-                            {user.role === 'admin' ? (
+                            {user.role !== 'peserta' ? (
                               <a
                                 href="/admin"
                                 onClick={() => setUserMenuOpen(false)}
@@ -439,7 +439,7 @@ function MobileMenu({ isOpen, links, user, token, onClose, onLogout, dashPath })
                 </div>
               </div>
 
-              {user.role === 'admin' ? (
+              {user.role !== 'peserta' ? (
                 <a href="/admin" onClick={onClose} className="w-full">
                   <button className="w-full px-6 py-3.5 rounded-2xl bg-[#70C492] text-[#112C1E] font-bold text-sm flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-[0_0_20px_rgba(112,196,146,0.2)]">
                     <LayoutDashboard size={16} /> Dashboard

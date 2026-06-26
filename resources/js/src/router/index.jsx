@@ -6,7 +6,6 @@ import PageTransition from '@/components/layout/PageTransition';
 // --- Layouts ---
 import PublicLayout  from '@/components/layout/PublicLayout';
 import PesertaLayout from '@/components/layout/PesertaLayout';
-import AdminLayout   from '@/components/layout/AdminLayout';
 
 // --- Lazy pages: Public ---
 const LandingPage   = lazy(() => import('@/pages/public/LandingPage'));
@@ -31,16 +30,6 @@ const PesertaRiwayat     = lazy(() => import('@/pages/peserta/RiwayatPage'));
 const PesertaProfil      = lazy(() => import('@/pages/peserta/ProfilPage'));
 const PesertaPengumpulan = lazy(() => import('@/pages/peserta/PengumpulanKaryaPage'));
 
-// --- Lazy pages: Admin (rebuild trigger) ---
-const AdminDashboard     = lazy(() => import('@/pages/admin/DashboardPage'));
-const AdminPendaftaran   = lazy(() => import('@/pages/admin/PendaftaranPage'));
-const AdminPendaftDetail = lazy(() => import('@/pages/admin/PendaftaranDetailPage'));
-const AdminLombaPageComp = lazy(() => import('@/pages/admin/LombaPage'));
-const AdminLombaForm     = lazy(() => import('@/pages/admin/LombaFormPage'));
-const AdminPengumumanPageComp = lazy(() => import('@/pages/admin/PengumumanPage'));
-const AdminGaleriPageComp = lazy(() => import('@/pages/admin/GaleriPage'));
-const AdminPemenang      = lazy(() => import('@/pages/admin/PemenangPage'));
-const AdminRolePerms     = lazy(() => import('@/pages/admin/RolePermissionsPage'));
 
 // --- Fallback loader ---
 function PageLoader() {
@@ -111,32 +100,6 @@ const router = createBrowserRouter([
           { path: '/peserta/riwayat',   element: <PesertaRiwayat /> },
           { path: '/peserta/profil',    element: <PesertaProfil /> },
           { path: '/peserta/pengumpulan', element: <PesertaPengumpulan /> },
-        ],
-      },
-    ],
-  },
-  // Admin area
-  {
-    element: <RequireAuth allowedRoles={['admin', 'po', 'sc', 'event', 'humas', 'bendahara', 'sekretaris']} />,
-    children: [
-      {
-        element: <AdminLayout />,
-        children: [
-          { path: '/admin',                         element: <AdminDashboard /> },
-          { path: '/admin/pendaftaran',             element: <AdminPendaftaran /> },
-          { path: '/admin/pendaftaran/:id',         element: <AdminPendaftDetail /> },
-          { path: '/admin/lomba',                   element: <AdminLombaPageComp /> },
-          { path: '/admin/lomba/buat',              element: <AdminLombaForm /> },
-          { path: '/admin/lomba/:id/edit',          element: <AdminLombaForm /> },
-          { path: '/admin/pengumuman',              element: <AdminPengumumanPageComp /> },
-          { path: '/admin/galeri',                  element: <AdminGaleriPageComp /> },
-          { path: '/admin/pemenang',                element: <AdminPemenang /> },
-          {
-            element: <RequireAuth allowedRoles={['admin']} />,
-            children: [
-              { path: '/admin/hak-akses',           element: <AdminRolePerms /> }
-            ]
-          }
         ],
       },
     ],
