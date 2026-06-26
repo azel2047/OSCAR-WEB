@@ -9,6 +9,11 @@ const SmoothScroll = forwardRef((props, ref) => {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
+    const lenis = lenisRef.current?.lenis;
+    if (lenis) {
+      lenis.on('scroll', ScrollTrigger.update);
+    }
+
     function update(time) {
       lenisRef.current?.lenis?.raf(time * 1000);
     }
@@ -17,6 +22,9 @@ const SmoothScroll = forwardRef((props, ref) => {
 
     return () => {
       gsap.ticker.remove(update);
+      if (lenis) {
+        lenis.off('scroll', ScrollTrigger.update);
+      }
     };
   }, []);
 

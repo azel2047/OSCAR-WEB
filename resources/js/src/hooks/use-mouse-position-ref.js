@@ -4,11 +4,15 @@ export const useMousePositionRef = (containerRef) => {
   const positionRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
+    let cachedRect = null;
+
     const updatePosition = (x, y) => {
       if (containerRef && containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const relativeX = x - rect.left - rect.width / 2;
-        const relativeY = y - rect.top - rect.height / 2;
+        if (!cachedRect) {
+          cachedRect = containerRef.current.getBoundingClientRect();
+        }
+        const relativeX = x - cachedRect.left - cachedRect.width / 2;
+        const relativeY = y - cachedRect.top - cachedRect.height / 2;
 
         // Calculate relative position even when outside the container
         positionRef.current = { x: relativeX, y: relativeY };
@@ -26,13 +30,19 @@ export const useMousePositionRef = (containerRef) => {
       updatePosition(touch.clientX, touch.clientY);
     };
 
-    // Listen for both mouse and touch events
+    const handleResize = () => {
+      cachedRect = null;
+    };
+
+    // Listen for mouse, touch, and window resize events
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("touchmove", handleTouchMove);
+    window.addEventListener("resize", handleResize);
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("resize", handleResize);
     };
   }, [containerRef]);
 
