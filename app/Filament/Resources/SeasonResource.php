@@ -90,8 +90,10 @@ class SeasonResource extends Resource
                                         ->afterStateUpdated(function ($state, callable $set) {
                                             if ($state) {
                                                 $file = is_array($state) ? array_values($state)[0] : $state;
-                                                if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                                                    $set('foto_utama', $file->getClientOriginalName());
+                                                if (is_string($file)) {
+                                                    $set('foto_utama', $file);
+                                                } elseif ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                                                    $set('foto_utama', 'seasons/' . $file->getFilename());
                                                 }
                                             } else {
                                                 $set('foto_utama', null);
