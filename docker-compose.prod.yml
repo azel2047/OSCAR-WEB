@@ -20,6 +20,8 @@ services:
     env_file:
       - .env.production
     volumes:
+      # Mount .env.production ke dalam container agar entrypoint bisa baca
+      - ./.env.production:/var/www/html/.env.production:ro
       # Persistent storage for user-uploaded files
       - oscar_storage:/var/www/html/storage/app
       # Logs persistence
