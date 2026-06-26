@@ -156,12 +156,19 @@ class SeasonResource extends Resource
 
                         Forms\Components\Repeater::make('galeri')
                             ->relationship('galeri')
+                            ->mutateRelationshipDataBeforeCreateUsing(function (array $data): array {
+                                unset($data['path_upload']);
+                                return $data;
+                            })
+                            ->mutateRelationshipDataBeforeSaveUsing(function (array $data): array {
+                                unset($data['path_upload']);
+                                return $data;
+                            })
                             ->schema([
                                 Forms\Components\FileUpload::make('path_upload')
                                     ->label('Upload Gambar Lokal')
                                     ->disk('public')
                                     ->directory('galeri')
-                                    ->dehydrated(false)
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set) {
                                         if ($state) {

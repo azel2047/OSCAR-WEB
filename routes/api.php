@@ -38,40 +38,29 @@ Route::get('dev-logs', function () {
     return response($last_lines, 200, ['Content-Type' => 'text/plain']);
 });
 
-Route::get('dev-inspect', function () {
-    $seasonsDir = public_path('storage/seasons');
-    $files = [];
-    if (file_exists($seasonsDir)) {
-        foreach (scandir($seasonsDir) as $f) {
+Route::get('dev-diagnose', function () {
+    $galeriDir = public_path('storage/galeri');
+    $galeriFiles = [];
+    if (file_exists($galeriDir)) {
+        foreach (scandir($galeriDir) as $f) {
             if ($f !== '.' && $f !== '..') {
-                $files[] = [
+                $galeriFiles[] = [
                     'name' => $f,
-                    'size' => filesize($seasonsDir . '/' . $f),
-                    'time' => date('Y-m-d H:i:s', filemtime($seasonsDir . '/' . $f)),
+                    'size' => filesize($galeriDir . '/' . $f),
+                    'time' => date('Y-m-d H:i:s', filemtime($galeriDir . '/' . $f)),
                 ];
             }
         }
-    } else {
-        $files = 'directory does not exist';
     }
     
-    $seasonsDb = App\Models\Season::all()->map(function($s) {
-        return [
-            'id' => $s->id,
-            'nama' => $s->nama,
-            'foto_utama' => $s->foto_utama,
-            'foto_utama_url' => $s->foto_utama_url,
-            'exists_public_path' => !empty($s->foto_utama) && file_exists(public_path('storage/' . $s->foto_utama)),
-            'exists_storage_path' => !empty($s->foto_utama) && file_exists(storage_path('app/public/' . $s->foto_utama)),
-        ];
-    });
-
+    $galeriDb = App\Models\GaleriSeason::all()->toArray();
+    
     return response()->json([
-        'seasons_dir' => $seasonsDir,
-        'files' => $files,
-        'seasons_db' => $seasonsDb,
-        'log_file_time' => file_exists(storage_path('logs/laravel.log')) ? date('Y-m-d H:i:s', filemtime(storage_path('logs/laravel.log'))) : 'no log file',
-        'log_file_size' => file_exists(storage_path('logs/laravel.log')) ? filesize(storage_path('logs/laravel.log')) : 0,
+        'galeri_dir' => $galeriDir,
+        'galeri_files_count' => count($galeriFiles),
+        'galeri_files_sample' => array_slice($galeriFiles, -10), // Last 10 files
+        'galeri_db_count' => count($galeriDb),
+        'galeri_db_sample' => array_slice($galeriDb, -10),
     ]);
 });
 
