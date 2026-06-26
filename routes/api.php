@@ -38,6 +38,31 @@ Route::get('dev-logs', function () {
     return response($last_lines, 200, ['Content-Type' => 'text/plain']);
 });
 
+Route::get('dev-inspect', function () {
+    $seasonsDir = public_path('storage/seasons');
+    $files = file_exists($seasonsDir) ? scandir($seasonsDir) : 'directory does not exist';
+    
+    $seasonsDb = App\Models\Season::all()->map(function($s) {
+        return [
+            'id' => $s->id,
+            'nama' => $s->nama,
+            'foto_utama' => $s->foto_utama,
+            'foto_utama_url' => $s->foto_utama_url,
+            'exists_public_path' => file_exists(public_path('storage/' . $s->foto_utama)),
+            'exists_storage_path' => file_exists(storage_path('app/public/' . $s->foto_utama)),
+        ];
+    });
+
+    return response()->json([
+        'seasons_dir' => $seasonsDir,
+        'files' => $files,
+        'seasons_db' => $seasonsDb,
+        'log_file_time' => file_exists(storage_path('logs/laravel.log')) ? date('Y-m-d H:i:s', filemtime(storage_path('logs/laravel.log'))) : 'no log file',
+        'log_file_size' => file_exists(storage_path('logs/laravel.log')) ? filesize(storage_path('logs/laravel.log')) : 0,
+    ]);
+});
+
+
 // ============================================================
 // AUTH
 // ============================================================
