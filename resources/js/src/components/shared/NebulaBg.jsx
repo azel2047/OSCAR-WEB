@@ -34,6 +34,24 @@ export default function NebulaBg() {
 
     const fireflyCount = 30; // Max 30 particles as requested
 
+    // Create an offscreen canvas to pre-render the glow particle once
+    const glowCanvas = document.createElement('canvas');
+    const glowSize = 32; // Diameter of the glow (radius 16px)
+    glowCanvas.width = glowSize;
+    glowCanvas.height = glowSize;
+    const gCtx = glowCanvas.getContext('2d');
+    
+    // Draw the gradient ONCE
+    const grad = gCtx.createRadialGradient(glowSize/2, glowSize/2, 0, glowSize/2, glowSize/2, glowSize/2);
+    grad.addColorStop(0, 'rgba(112, 196, 146, 1)');
+    grad.addColorStop(0.3, 'rgba(112, 196, 146, 0.4)');
+    grad.addColorStop(1, 'rgba(112, 196, 146, 0)');
+    
+    gCtx.beginPath();
+    gCtx.arc(glowSize/2, glowSize/2, glowSize/2, 0, Math.PI * 2);
+    gCtx.fillStyle = grad;
+    gCtx.fill();
+
     // 30 sharp glowing particles with varying size and opacity in Teal
     const fireflies = Array.from({ length: fireflyCount }, () => {
       return {
@@ -57,28 +75,23 @@ export default function NebulaBg() {
         f.driftPhase += f.driftSpeed;
         f.x += Math.sin(f.driftPhase) * f.driftAmp;
 
-        // Reset if went out of screen at top
-        if (f.y < -f.r) {
-          f.y = height + f.r;
+        // Reset if went out of screen at top (use diameter size boundary)
+        const size = f.r * 7;
+        if (f.y < -size) {
+          f.y = height + size;
           f.x = Math.random() * width;
         }
 
         // Horizontal wrap boundaries
-        if (f.x < -f.r) f.x = width + f.r;
-        if (f.x > width + f.r) f.x = -f.r;
+        if (f.x < -size) f.x = width + size;
+        if (f.x > width + size) f.x = -size;
 
-        // Draw glowing siber teal circle with radial gradient
-        const grad = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r * 3.5);
-        grad.addColorStop(0, `rgba(112, 196, 146, ${f.opacity})`);
-        grad.addColorStop(0.4, `rgba(112, 196, 146, ${f.opacity * 0.3})`);
-        grad.addColorStop(1, 'transparent');
-
-        ctx.beginPath();
-        ctx.arc(f.x, f.y, f.r * 3.5, 0, Math.PI * 2);
-        ctx.fillStyle = grad;
-        ctx.fill();
+        // Draw the pre-rendered glowing circle with scale & opacity
+        ctx.globalAlpha = f.opacity;
+        ctx.drawImage(glowCanvas, f.x - size / 2, f.y - size / 2, size, size);
       });
 
+      ctx.globalAlpha = 1.0; // Reset canvas alpha
       animationFrameId = requestAnimationFrame(animate);
     };
 

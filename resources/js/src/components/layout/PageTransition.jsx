@@ -47,8 +47,8 @@ export default function PageTransition({ className = '', duration = 0.45 }) {
     if (!el) return;
     gsap.fromTo(
       el,
-      { opacity: 0, y: 25, filter: 'blur(3px)' },
-      { opacity: 1, y: 0, filter: 'blur(0px)', duration, ease: 'power4.out', clearProps: 'filter' }
+      { opacity: 0, y: 25 },
+      { opacity: 1, y: 0, duration, ease: 'power4.out' }
     );
   }, []);
 
@@ -75,7 +75,6 @@ export default function PageTransition({ className = '', duration = 0.45 }) {
     gsap.to(el, {
       opacity: 0,
       y: -15,
-      filter: 'blur(3px)',
       duration: duration * 0.5,
       ease: 'power2.in',
       onComplete: () => {
@@ -91,14 +90,12 @@ export default function PageTransition({ className = '', duration = 0.45 }) {
         requestAnimationFrame(() => {
           gsap.fromTo(
             el,
-            { opacity: 0, y: 25, filter: 'blur(3px)' },
+            { opacity: 0, y: 25 },
             {
               opacity: 1,
               y: 0,
-              filter: 'blur(0px)',
               duration,
               ease: 'power4.out',
-              clearProps: 'filter',
             }
           );
         });
@@ -116,7 +113,6 @@ export default function PageTransition({ className = '', duration = 0.45 }) {
       gsap.to(el, {
         opacity: 0,
         y: -15,
-        filter: 'blur(3px)',
         duration: duration * 0.5,
         ease: 'power2.in',
         onComplete: () => {
@@ -128,8 +124,8 @@ export default function PageTransition({ className = '', duration = 0.45 }) {
           requestAnimationFrame(() => {
             gsap.fromTo(
               el,
-              { opacity: 0, y: 25, filter: 'blur(3px)' },
-              { opacity: 1, y: 0, filter: 'blur(0px)', duration, ease: 'power4.out', clearProps: 'filter' }
+              { opacity: 0, y: 25 },
+              { opacity: 1, y: 0, duration, ease: 'power4.out' }
             );
           });
         },
@@ -141,7 +137,7 @@ export default function PageTransition({ className = '', duration = 0.45 }) {
     <div
       ref={containerRef}
       className={className}
-      style={{ willChange: 'opacity, transform, filter' }}
+      style={{ willChange: 'opacity, transform' }}
     >
       <Suspense fallback={<LocalPageLoader />}>
         {displayedOutlet}

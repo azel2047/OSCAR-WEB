@@ -35,16 +35,14 @@ export default function usePageEntrance(options = {}) {
     if (children.length > 0) {
       gsap.fromTo(
         children,
-        { opacity: 0, y, filter: 'blur(3px)' },
+        { opacity: 0, y },
         {
           opacity: 1,
           y: 0,
-          filter: 'blur(0px)',
           duration,
           ease: 'power3.out',
           stagger,
           delay,
-          clearProps: 'filter',
         }
       );
     } else {
