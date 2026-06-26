@@ -1,0 +1,56 @@
+# =============================================================================
+# OSCAR 3.0 — .dockerignore
+# Excludes unnecessary files from the Docker build context
+# =============================================================================
+
+# ── Version control ───────────────────────────────────────────────────────────
+.git
+.gitattributes
+.gitignore
+
+# ── Editor & OS ───────────────────────────────────────────────────────────────
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+*.log
+
+# ── Node.js ───────────────────────────────────────────────────────────────────
+node_modules
+
+# ── PHP vendor (built in CI/CD or Docker stage) ───────────────────────────────
+vendor
+
+# ── Laravel generated/runtime files ──────────────────────────────────────────
+storage/pail
+storage/logs/*.log
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*.php
+
+# ── Build artifacts (compiled in Node stage) ─────────────────────────────────
+public/build
+public/hot
+
+# ── Environment files (mounted or injected at runtime) ───────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Docker files themselves ────────────────────────────────────────────────────
+docker-compose*.yml
+Dockerfile*
+
+# ── Documentation & dev files ────────────────────────────────────────────────
+*.md
+PRD_*.md
+ui-ux-pro-max-skill
+scratch
+tests
+
+# ── PHP dev tools ────────────────────────────────────────────────────────────
+phpunit.xml
+.phpunit.result.cache
+.phpactor.json
+Homestead.*
