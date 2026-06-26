@@ -118,15 +118,16 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Create nginx log directory
-RUN mkdir -p /var/log/nginx /var/log/php-fpm /var/run/nginx \
-    && chown -R www-data:www-data /var/log/nginx /var/log/php-fpm
+# Create nginx log directory and ssl directory
+RUN mkdir -p /var/log/nginx /var/log/php-fpm /var/run/nginx /etc/nginx/ssl \
+    && chown -R www-data:www-data /var/log/nginx /var/log/php-fpm \
+    && chmod 700 /etc/nginx/ssl
 
 # Copy and set entrypoint
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 80
+EXPOSE 80 443
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
