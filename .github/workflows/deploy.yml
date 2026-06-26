@@ -194,6 +194,12 @@ jobs:
             # Verifikasi container berjalan
             docker compose -f docker-compose.prod.yml ps
 
+            echo "→ Nginx Config Test:"
+            docker compose -f docker-compose.prod.yml exec -T app nginx -t || true
+
+            echo "→ Container Logs:"
+            docker compose -f docker-compose.prod.yml logs --tail=100 app || true
+
             # Bersihkan image lama yang tidak terpakai
             echo "→ Cleaning up old images..."
             docker image prune -f --filter "until=24h"
