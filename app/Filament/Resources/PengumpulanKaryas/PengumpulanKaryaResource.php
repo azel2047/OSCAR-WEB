@@ -6,6 +6,9 @@ use App\Filament\Resources\PengumpulanKaryas\Pages\ManagePengumpulanKaryas;
 use App\Models\PengumpulanKarya;
 use Filament\Forms;
 use Filament\Actions\ViewAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkActionGroup;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Grid;
@@ -164,11 +167,11 @@ class PengumpulanKaryaResource extends Resource
             ])
             ->actions([
                 ViewAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
