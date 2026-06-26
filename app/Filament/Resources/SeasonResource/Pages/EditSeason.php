@@ -19,17 +19,20 @@ class EditSeason extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        \Log::info('mutateFormDataBeforeSave keys: ' . implode(', ', array_keys($data)));
-        \Log::info('mutateFormDataBeforeSave foto_utama_upload:', ['val' => $data['foto_utama_upload'] ?? 'not_present']);
-        \Log::info('mutateFormDataBeforeSave foto_utama:', ['val' => $data['foto_utama'] ?? 'not_present']);
+        $logPath = storage_path('logs/custom_debug.log');
+        $logMsg = date('Y-m-d H:i:s') . " - mutateFormDataBeforeSave keys: " . implode(', ', array_keys($data)) . "\n";
+        $logMsg .= "foto_utama_upload: " . json_encode($data['foto_utama_upload'] ?? 'not_present') . "\n";
+        $logMsg .= "foto_utama: " . json_encode($data['foto_utama'] ?? 'not_present') . "\n";
 
         if (!empty($data['foto_utama_upload'])) {
             $data['foto_utama'] = is_array($data['foto_utama_upload']) 
                 ? array_values($data['foto_utama_upload'])[0] 
                 : $data['foto_utama_upload'];
-            \Log::info('mutateFormDataBeforeSave set foto_utama to:', ['val' => $data['foto_utama']]);
+            $logMsg .= "set foto_utama to: " . $data['foto_utama'] . "\n";
         }
         unset($data['foto_utama_upload']);
+        
+        file_put_contents($logPath, $logMsg, FILE_APPEND);
         return $data;
     }
 }

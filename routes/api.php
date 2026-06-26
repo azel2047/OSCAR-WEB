@@ -94,6 +94,26 @@ Route::get('dev-log-test', function () {
     }
 });
 
+Route::get('dev-debug-logs', function () {
+    $path = storage_path('logs/custom_debug.log');
+    if (!file_exists($path)) {
+        return response()->json(['message' => 'No custom debug log file found'], 404);
+    }
+    $lines = file($path);
+    $last_lines = array_slice($lines, -150);
+    return response($last_lines, 200, ['Content-Type' => 'text/plain']);
+});
+
+Route::get('dev-debug-logs-clear', function () {
+    $path = storage_path('logs/custom_debug.log');
+    if (file_exists($path)) {
+        unlink($path);
+        return response()->json(['message' => 'Logs cleared']);
+    }
+    return response()->json(['message' => 'No logs to clear']);
+});
+
+
 
 
 // ============================================================
