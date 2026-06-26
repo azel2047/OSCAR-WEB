@@ -205,7 +205,7 @@ jobs:
           echo "→ Menunggu aplikasi siap..."
           sleep 20
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            https://kompetisioscar.my.id/api/health || echo "000")
+            https://kompetisioscar.my.id || echo "000")
           if [ "$STATUS" = "200" ]; then
             echo "✅ Health check PASSED (HTTP $STATUS)"
           else
