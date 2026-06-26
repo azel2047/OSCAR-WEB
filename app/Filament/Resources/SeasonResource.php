@@ -90,6 +90,13 @@ class SeasonResource extends Resource
                                     Forms\Components\TextInput::make('foto_utama')
                                         ->label('Path Foto Utama / URL')
                                         ->helperText('Jika Anda mengupload foto utama lokal, path file akan otomatis disimpan pada kolom ini saat disimpan.')
+                                        ->dehydrateStateUsing(function ($state, $get) {
+                                            $upload = $get('foto_utama_upload');
+                                            if ($upload) {
+                                                return is_array($upload) ? array_values($upload)[0] : $upload;
+                                            }
+                                            return $state;
+                                        })
                                         ->maxLength(255),
                                 ]),
                                 Group::make([
