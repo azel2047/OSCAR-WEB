@@ -170,3 +170,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin,po,sc,event,huma
     // Laporan
     Route::get('laporan/ringkasan',     [AdminLaporanController::class, 'ringkasan']);
 });
+
+Route::get('test-seasons', function () {
+    return response()->json(App\Models\Season::all());
+});
