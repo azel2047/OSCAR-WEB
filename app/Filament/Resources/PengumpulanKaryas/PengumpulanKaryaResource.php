@@ -5,6 +5,7 @@ namespace App\Filament\Resources\PengumpulanKaryas;
 use App\Filament\Resources\PengumpulanKaryas\Pages\ManagePengumpulanKaryas;
 use App\Models\PengumpulanKarya;
 use Filament\Forms;
+use Filament\Actions\ViewAction;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Grid;
@@ -162,7 +163,7 @@ class PengumpulanKaryaResource extends Resource
                     ->label('Cabang Lomba'),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                ViewAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
