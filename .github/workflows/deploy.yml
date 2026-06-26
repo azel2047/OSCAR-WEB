@@ -14,6 +14,7 @@
 # │ SSH_PORT                │ Port SSH (default: 22)                       │
 # │ DEPLOY_PATH             │ Path project di server (/var/www/oscar-web)  │
 # │ GHCR_PAT                │ GitHub Personal Access Token (write:packages)│
+# │ ENV_PRODUCTION          │ Seluruh isi file .env.production             │
 # └─────────────────────────┴──────────────────────────────────────────────┘
 # =============================================================================
 
@@ -27,7 +28,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}   # kompetisi-oscar/oscar-web
+  IMAGE_NAME: kompetisi-oscar/oscar-web
 
 jobs:
   # ═══════════════════════════════════════════════════════════════════════════
@@ -116,6 +117,46 @@ jobs:
           target: ${{ secrets.DEPLOY_PATH }}
           overwrite: true
 
+      - name: 🔐 Deploy .env.production ke server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            mkdir -p ${{ secrets.DEPLOY_PATH }}
+            cat > ${{ secrets.DEPLOY_PATH }}/.env.production << 'ENV_EOF'
+            ${{ secrets.ENV_PRODUCTION }}
+            ENV_EOF
+            chmod 600 ${{ secrets.DEPLOY_PATH }}/.env.production
+            echo "✅ .env.production berhasil ditulis"
+
+      - name: 🔒 Deploy SSL Certificate ke server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            mkdir -p ${{ secrets.DEPLOY_PATH }}/ssl
+            chmod 700 ${{ secrets.DEPLOY_PATH }}/ssl
+
+            # Tulis certificate
+            cat > ${{ secrets.DEPLOY_PATH }}/ssl/origin.crt << 'CERT_EOF'
+            ${{ secrets.SSL_CERTIFICATE }}
+            CERT_EOF
+            chmod 644 ${{ secrets.DEPLOY_PATH }}/ssl/origin.crt
+
+            # Tulis private key
+            cat > ${{ secrets.DEPLOY_PATH }}/ssl/origin.key << 'KEY_EOF'
+            ${{ secrets.SSL_PRIVATE_KEY }}
+            KEY_EOF
+            chmod 600 ${{ secrets.DEPLOY_PATH }}/ssl/origin.key
+
+            echo "✅ SSL certificate berhasil ditulis"
+
       - name: 🚀 Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -164,7 +205,7 @@ jobs:
           echo "→ Menunggu aplikasi siap..."
           sleep 20
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            http://${{ secrets.SSH_HOST }}/api/health || echo "000")
+            https://kompetisioscar.my.id/api/health || echo "000")
           if [ "$STATUS" = "200" ]; then
             echo "✅ Health check PASSED (HTTP $STATUS)"
           else

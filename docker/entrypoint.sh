@@ -24,7 +24,26 @@ chown -R www-data:www-data /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage
 chmod -R 775 /var/www/html/bootstrap/cache
 
-# ── Wait for environment to be ready ──────────────────────────────────────────
+# ── Buat .env dari env_file Docker ───────────────────────────────────────────
+# Docker inject env vars dari env_file ke container, tapi Laravel butuh
+# file .env fisik di project root untuk php artisan commands.
+echo "→ Writing .env file..."
+if [ -f "/run/secrets/env_production" ]; then
+    # Jika menggunakan Docker secrets
+    cp /run/secrets/env_production /var/www/html/.env
+elif [ -f "/var/www/html/.env.production" ]; then
+    # Jika file .env.production di-mount langsung
+    cp /var/www/html/.env.production /var/www/html/.env
+else
+    # Tulis dari environment variables yang sudah diinject Docker
+    printenv | grep -v "^PATH\|^HOME\|^HOSTNAME\|^TERM\|^SHLVL\|^PWD\|^_=" \
+        | sort > /var/www/html/.env
+fi
+chmod 600 /var/www/html/.env
+chown www-data:www-data /var/www/html/.env
+echo "   ✓ .env file ready"
+
+# ── Cek APP_KEY ────────────────────────────────────────────────────────────────
 echo "→ Checking environment variables..."
 if [ -z "$APP_KEY" ]; then
     echo "⚠  WARNING: APP_KEY is not set! Generating one..."
@@ -48,6 +67,7 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 php artisan event:cache
+php artisan package:discover --ansi
 php artisan filament:upgrade
 
 # ── Create storage symlink ────────────────────────────────────────────────────
