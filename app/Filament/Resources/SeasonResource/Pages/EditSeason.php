@@ -16,4 +16,15 @@ class EditSeason extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (!empty($data['foto_utama_upload'])) {
+            $data['foto_utama'] = is_array($data['foto_utama_upload']) 
+                ? array_values($data['foto_utama_upload'])[0] 
+                : $data['foto_utama_upload'];
+        }
+        unset($data['foto_utama_upload']);
+        return $data;
+    }
 }
