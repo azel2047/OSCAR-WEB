@@ -62,6 +62,26 @@ Route::get('dev-inspect', function () {
     ]);
 });
 
+Route::get('dev-log-test', function () {
+    try {
+        \Log::info('Dev Log Test Message');
+        $path = storage_path('logs/laravel.log');
+        return response()->json([
+            'success' => true,
+            'log_writable' => is_writable($path),
+            'log_owner' => fileowner($path),
+            'current_user' => posix_getpwuid(posix_geteuid())['name'] ?? 'unknown',
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
+});
+
+
 
 // ============================================================
 // AUTH
