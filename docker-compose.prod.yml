@@ -1,7 +1,11 @@
 # =============================================================================
 # OSCAR 3.0 — Docker Compose Production
 # =============================================================================
+# Image dibangun & di-push oleh GitHub Actions ke GHCR.
+# Server hanya perlu pull & run — TIDAK perlu build lokal.
+#
 # Usage:
+#   docker compose -f docker-compose.prod.yml pull
 #   docker compose -f docker-compose.prod.yml up -d
 #   docker compose -f docker-compose.prod.yml down
 # =============================================================================
@@ -10,11 +14,7 @@ services:
 
   # ── App (Laravel + React SPA + Filament + Nginx + Queue Worker) ─────────────
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: production
-    image: oscar-web:latest
+    image: ghcr.io/kompetisi-oscar/oscar-web:latest
     container_name: oscar_app
     restart: unless-stopped
     env_file:
