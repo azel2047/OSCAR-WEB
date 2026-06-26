@@ -40,7 +40,20 @@ Route::get('dev-logs', function () {
 
 Route::get('dev-inspect', function () {
     $seasonsDir = public_path('storage/seasons');
-    $files = file_exists($seasonsDir) ? scandir($seasonsDir) : 'directory does not exist';
+    $files = [];
+    if (file_exists($seasonsDir)) {
+        foreach (scandir($seasonsDir) as $f) {
+            if ($f !== '.' && $f !== '..') {
+                $files[] = [
+                    'name' => $f,
+                    'size' => filesize($seasonsDir . '/' . $f),
+                    'time' => date('Y-m-d H:i:s', filemtime($seasonsDir . '/' . $f)),
+                ];
+            }
+        }
+    } else {
+        $files = 'directory does not exist';
+    }
     
     $seasonsDb = App\Models\Season::all()->map(function($s) {
         return [
@@ -48,8 +61,8 @@ Route::get('dev-inspect', function () {
             'nama' => $s->nama,
             'foto_utama' => $s->foto_utama,
             'foto_utama_url' => $s->foto_utama_url,
-            'exists_public_path' => file_exists(public_path('storage/' . $s->foto_utama)),
-            'exists_storage_path' => file_exists(storage_path('app/public/' . $s->foto_utama)),
+            'exists_public_path' => !empty($s->foto_utama) && file_exists(public_path('storage/' . $s->foto_utama)),
+            'exists_storage_path' => !empty($s->foto_utama) && file_exists(storage_path('app/public/' . $s->foto_utama)),
         ];
     });
 
