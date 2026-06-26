@@ -28,6 +28,16 @@ Route::get('health', function () {
     ], 200);
 });
 
+Route::get('dev-logs', function () {
+    $path = storage_path('logs/laravel.log');
+    if (!file_exists($path)) {
+        return response()->json(['message' => 'No log file found'], 404);
+    }
+    $lines = file($path);
+    $last_lines = array_slice($lines, -150);
+    return response($last_lines, 200, ['Content-Type' => 'text/plain']);
+});
+
 // ============================================================
 // AUTH
 // ============================================================
