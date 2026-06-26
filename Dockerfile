@@ -27,6 +27,12 @@ FROM composer:2.8 AS composer-builder
 WORKDIR /app
 
 COPY composer.json composer.lock ./
+
+# Dibutuhkan oleh --optimize-autoloader untuk scan PSR-4 classmap
+COPY app/ ./app/
+COPY database/ ./database/
+COPY bootstrap/ ./bootstrap/
+
 RUN composer install \
     --no-dev \
     --no-interaction \
