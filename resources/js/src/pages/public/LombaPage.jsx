@@ -4,7 +4,8 @@ import useLombaStore from '@/stores/lombaStore';
 import { gsap } from '@/animations/gsapConfig';
 import { 
   Code, PenTool, BarChart3, Shield, Sparkles,
-  UserPlus, Calendar, UploadCloud, CheckCircle, Tv, Trophy
+  UserPlus, Calendar, UploadCloud, CheckCircle, Tv, Trophy,
+  Layout
 } from 'lucide-react';
 
 const CABANG_ICONS = {
@@ -12,6 +13,7 @@ const CABANG_ICONS = {
   'desain-poster': PenTool,
   'desain-infografis': BarChart3,
   'ctf': Shield,
+  'desain-ui-ux': Layout,
 };
 
 const TIMELINE_EVENTS = [
@@ -63,7 +65,7 @@ function LombaCard({ lomba }) {
           className="w-full"
         >
           <button className="w-full py-2.5 text-center text-xs font-bold font-cyber text-[#70C492] hover:text-[#112C1E] bg-transparent hover:bg-[#70C492] border border-[#70C492]/40 hover:border-transparent rounded-xl transition-all uppercase tracking-widest">
-            Download Booklet
+            Download Buku Panduan
           </button>
         </a>
       </div>
@@ -157,12 +159,12 @@ export default function LombaPage() {
           {mahasiswaLombas.map((lomba) => (
             <LombaCard key={lomba.id} lomba={lomba} />
           ))}
-          {/* Visual fallback if DB lists are empty for CTF */}
+          {/* Visual fallback if DB lists are empty for UI/UX */}
           {mahasiswaLombas.length === 0 && (
             <LombaCard 
               lomba={{
-                nama: 'CTF (Capture The Flag)',
-                slug: 'ctf',
+                nama: 'Desain UI/UX',
+                slug: 'desain-ui-ux',
                 kategori: 'mahasiswa'
               }} 
             />
@@ -186,8 +188,9 @@ export default function LombaPage() {
           {siswaLombas.length === 0 && (
             <>
               <LombaCard lomba={{ nama: 'Web Development', slug: 'web-development', kategori: 'siswa' }} />
-              <LombaCard lomba={{ nama: 'Infografis', slug: 'desain-infografis', kategori: 'siswa' }} />
-              <LombaCard lomba={{ nama: 'Poster', slug: 'desain-poster', kategori: 'siswa' }} />
+              <LombaCard lomba={{ nama: 'Desain Poster', slug: 'desain-poster', kategori: 'siswa' }} />
+              <LombaCard lomba={{ nama: 'Desain Infografis', slug: 'desain-infografis', kategori: 'siswa' }} />
+              <LombaCard lomba={{ nama: 'Capture The Flag', slug: 'ctf', kategori: 'siswa' }} />
             </>
           )}
         </div>

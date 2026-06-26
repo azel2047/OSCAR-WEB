@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Code, BarChart3, PenTool, Shield } from 'lucide-react';
+import { Code, BarChart3, PenTool, Shield, Layout } from 'lucide-react';
 import useAuthStore from '@/stores/authStore';
 
 const InteractiveSelector = ({ lombas = [] }) => {
@@ -14,7 +14,7 @@ const InteractiveSelector = ({ lombas = [] }) => {
       {
         slug: "web-development",
         title: "Web Development",
-        category: "Siswa & Mahasiswa",
+        category: "Siswa SMA/SMK",
         description: "Rancang & bangun aplikasi web inovatif bertema lingkungan.",
         image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop",
         icon: <Code size={20} className="text-[#70C492]" />,
@@ -23,7 +23,7 @@ const InteractiveSelector = ({ lombas = [] }) => {
       {
         slug: "desain-infografis",
         title: "Infografis",
-        category: "Siswa & Mahasiswa",
+        category: "Siswa SMA/SMK",
         description: "Visualisasikan data sains dan lingkungan lewat desain informatif.",
         image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop",
         icon: <BarChart3 size={20} className="text-[#70C492]" />,
@@ -32,7 +32,7 @@ const InteractiveSelector = ({ lombas = [] }) => {
       {
         slug: "desain-poster",
         title: "Poster Digital",
-        category: "Siswa & Mahasiswa",
+        category: "Siswa SMA/SMK",
         description: "Ekspresikan kampanye hijau melestarikan bumi lewat seni poster digital.",
         image: "https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=800&auto=format&fit=crop",
         icon: <PenTool size={20} className="text-[#70C492]" />,
@@ -41,11 +41,20 @@ const InteractiveSelector = ({ lombas = [] }) => {
       {
         slug: "ctf",
         title: "Capture The Flag (CTF)",
-        category: "Mahasiswa",
+        category: "Siswa SMA/SMK",
         description: "Pecahkan berbagai tantangan cyber security & hacking bergengsi.",
         image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop",
         icon: <Shield size={20} className="text-[#70C492]" />,
         link: "/lomba/ctf"
+      },
+      {
+        slug: "desain-ui-ux",
+        title: "Desain UI/UX",
+        category: "Mahasiswa",
+        description: "Rancang antarmuka pengguna yang estetik, intuitif, dan solutif.",
+        image: "https://images.unsplash.com/photo-1581291518655-9523c932ded7?q=80&w=800&auto=format&fit=crop",
+        icon: <Layout size={20} className="text-[#70C492]" />,
+        link: "/lomba/desain-ui-ux"
       }
     ];
 

@@ -9,7 +9,8 @@ import useAuthStore from '@/stores/authStore';
 import {
   ArrowRight, Code, Shield, PenTool, BarChart3, 
   Leaf, Zap, Users, Trophy, Check, Calendar,
-  UserPlus, Clock, ClipboardCheck, Megaphone, Sparkles
+  UserPlus, Clock, ClipboardCheck, Megaphone, Sparkles,
+  Download
 } from 'lucide-react';
 import InteractiveSelector from '@/components/ui/interactive-selector';
 import Floating, { FloatingElement } from '@/components/ui/parallax-floating';
@@ -104,11 +105,20 @@ export default function LandingPage() {
   const { token } = useAuthStore();
   const isLoggedIn = !!token;
   const pendaftaranPath = isLoggedIn ? '/peserta/daftar' : '/register';
+  const [bookletUrl, setBookletUrl] = useState('');
 
   useEffect(() => {
     fetchMitras(() => api.get('/mitra'));
     fetchTimeline(() => api.get('/timeline'));
     fetchLombas(() => api.get('/lomba'));
+
+    api.get('/config/booklet_url')
+      .then(res => {
+        if (res.data?.success && res.data?.data?.value) {
+          setBookletUrl(res.data.data.value);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const dynamicMitras = React.useMemo(() => {
@@ -415,7 +425,7 @@ export default function LandingPage() {
               </Link>
             </motion.button>
             <motion.button
-              className="flex items-center gap-2 px-8 py-3.5 rounded-full border border-[#70C492]/40 text-[#70C492] hover:border-[#70C492] hover:bg-[#70C492]/10 font-cyber font-bold text-sm tracking-wider transition-all"
+              className="flex items-center gap-2 px-8 py-3.5 rounded-full border border-[#70C492]/40 text-[#70C492] hover:border-[#70C492] hover:bg-[#70C492]/10 font-cyber font-bold text-sm tracking-wider transition-all cursor-pointer"
               animate={{ opacity: 1, y: 0 }}
               initial={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.2, ease: "easeOut", delay: 0.7 }}
@@ -423,10 +433,29 @@ export default function LandingPage() {
                 scale: 1.05,
                 transition: { type: "spring", damping: 30, stiffness: 400 },
               }}
+              onClick={() => {
+                if (bookletUrl) {
+                  if (bookletUrl.startsWith('http')) {
+                    window.open(bookletUrl, '_blank');
+                  } else {
+                    const link = document.createElement('a');
+                    link.href = bookletUrl;
+                    link.setAttribute('download', '');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }
+                } else {
+                  const link = document.createElement('a');
+                  link.href = '/booklet-oscar3.pdf';
+                  link.setAttribute('download', 'booklet-oscar3.pdf');
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }
+              }}
             >
-              <Link to="/lomba" className="flex items-center gap-2">
-                Jelajahi Lomba <ArrowRight size={15} />
-              </Link>
+              Download Buku Panduan <Download size={15} />
             </motion.button>
           </div>
 

@@ -13,7 +13,8 @@ class LombaSeeder extends Seeder
             ['nama'=>'Web Development',    'slug'=>'web-development',    'kategori'=>'siswa',      'kuota'=>50,  'hadiah_1'=>'Rp 1.500.000 + Piala + Sertifikat', 'hadiah_2'=>'Rp 1.000.000 + Sertifikat', 'hadiah_3'=>'Rp 750.000 + Sertifikat'],
             ['nama'=>'Desain Poster',      'slug'=>'desain-poster',      'kategori'=>'siswa',      'kuota'=>100, 'hadiah_1'=>'Rp 1.000.000 + Piala + Sertifikat', 'hadiah_2'=>'Rp 750.000 + Sertifikat',   'hadiah_3'=>'Rp 500.000 + Sertifikat'],
             ['nama'=>'Desain Infografis',  'slug'=>'desain-infografis',  'kategori'=>'siswa',      'kuota'=>100, 'hadiah_1'=>'Rp 1.000.000 + Piala + Sertifikat', 'hadiah_2'=>'Rp 750.000 + Sertifikat',   'hadiah_3'=>'Rp 500.000 + Sertifikat'],
-            ['nama'=>'Capture The Flag',   'slug'=>'ctf',                'kategori'=>'mahasiswa',  'kuota'=>30,  'hadiah_1'=>'Rp 2.000.000 + Piala + Sertifikat', 'hadiah_2'=>'Rp 1.500.000 + Sertifikat', 'hadiah_3'=>'Rp 1.000.000 + Sertifikat'],
+            ['nama'=>'Capture The Flag',   'slug'=>'ctf',                'kategori'=>'siswa',      'kuota'=>30,  'hadiah_1'=>'Rp 2.000.000 + Piala + Sertifikat', 'hadiah_2'=>'Rp 1.500.000 + Sertifikat', 'hadiah_3'=>'Rp 1.000.000 + Sertifikat'],
+            ['nama'=>'Desain UI/UX',       'slug'=>'desain-ui-ux',       'kategori'=>'mahasiswa',  'kuota'=>50,  'hadiah_1'=>'Rp 2.000.000 + Piala + Sertifikat', 'hadiah_2'=>'Rp 1.500.000 + Sertifikat', 'hadiah_3'=>'Rp 1.000.000 + Sertifikat'],
         ];
 
         foreach ($items as $item) {
