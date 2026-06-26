@@ -17,6 +17,18 @@ use App\Http\Controllers\Api\Admin\{
 };
 
 // ============================================================
+// HEALTH CHECK (Docker & Monitoring)
+// ============================================================
+Route::get('health', function () {
+    return response()->json([
+        'status'  => 'ok',
+        'app'     => config('app.name'),
+        'env'     => config('app.env'),
+        'time'    => now()->toISOString(),
+    ], 200);
+});
+
+// ============================================================
 // AUTH
 // ============================================================
 Route::prefix('auth')->group(function () {

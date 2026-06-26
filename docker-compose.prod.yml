@@ -1,0 +1,79 @@
+# =============================================================================
+# OSCAR 3.0 — Docker Compose Production
+# =============================================================================
+# Image dibangun & di-push oleh GitHub Actions ke GHCR.
+# Server hanya perlu pull & run — TIDAK perlu build lokal.
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.prod.yml up -d
+#   docker compose -f docker-compose.prod.yml down
+# =============================================================================
+
+services:
+
+  # ── App (Laravel + React SPA + Filament + Nginx + Queue Worker) ─────────────
+  app:
+    image: ghcr.io/kompetisi-oscar/oscar-web:latest
+    container_name: oscar_app
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    volumes:
+      # Mount .env.production ke dalam container agar entrypoint bisa baca
+      - ./.env.production:/var/www/html/.env.production:ro
+      # SSL Certificate (Cloudflare Origin Certificate)
+      - ./ssl/origin.crt:/etc/nginx/ssl/origin.crt:ro
+      - ./ssl/origin.key:/etc/nginx/ssl/origin.key:ro
+      # Persistent storage for user-uploaded files
+      - oscar_storage:/var/www/html/storage/app
+      # Logs persistence
+      - oscar_logs:/var/www/html/storage/logs
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - oscar_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    labels:
+      # Traefik labels (aktifkan jika pakai Traefik reverse proxy)
+      - "traefik.enable=false"
+      # - "traefik.http.routers.oscar.rule=Host(`oscar.yourdomain.com`)"
+      # - "traefik.http.routers.oscar.entrypoints=websecure"
+      # - "traefik.http.routers.oscar.tls.certresolver=letsencrypt"
+
+  # ── Redis (opsional — untuk cache & queue upgrade di masa depan) ─────────────
+  # Aktifkan block ini jika ingin berpindah dari database queue ke Redis queue
+  # redis:
+  #   image: redis:7.2-alpine
+  #   container_name: oscar_redis
+  #   restart: unless-stopped
+  #   command: redis-server --requirepass ${REDIS_PASSWORD:-your_redis_password}
+  #   volumes:
+  #     - oscar_redis_data:/data
+  #   networks:
+  #     - oscar_network
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+
+# ── Volumes ────────────────────────────────────────────────────────────────────
+volumes:
+  oscar_storage:
+    driver: local
+  oscar_logs:
+    driver: local
+  # oscar_redis_data:
+  #   driver: local
+
+# ── Networks ───────────────────────────────────────────────────────────────────
+networks:
+  oscar_network:
+    driver: bridge
