@@ -27,7 +27,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}   # kompetisi-oscar/oscar-web
+  IMAGE_NAME: kompetisi-oscar/oscar-web
 
 jobs:
   # ═══════════════════════════════════════════════════════════════════════════
