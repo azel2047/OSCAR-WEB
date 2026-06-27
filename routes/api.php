@@ -28,6 +28,139 @@ Route::get('health', function () {
     ], 200);
 });
 
+Route::get('dev-logs', function () {
+    $path = storage_path('logs/laravel.log');
+    if (!file_exists($path)) {
+        return response()->json(['message' => 'No log file found'], 404);
+    }
+    $lines = file($path);
+    $last_lines = array_slice($lines, -150);
+    return response($last_lines, 200, ['Content-Type' => 'text/plain']);
+});
+
+Route::get('dev-diagnose', function () {
+    $galeriDir = public_path('storage/galeri');
+    $galeriFiles = [];
+    if (file_exists($galeriDir)) {
+        foreach (scandir($galeriDir) as $f) {
+            if ($f !== '.' && $f !== '..') {
+                $galeriFiles[] = [
+                    'name' => $f,
+                    'size' => filesize($galeriDir . '/' . $f),
+                    'time' => date('Y-m-d H:i:s', filemtime($galeriDir . '/' . $f)),
+                ];
+            }
+        }
+    }
+    
+    $galeriDb = App\Models\GaleriSeason::all()->toArray();
+    
+    return response()->json([
+        'galeri_dir' => $galeriDir,
+        'galeri_files_count' => count($galeriFiles),
+        'galeri_files_sample' => array_slice($galeriFiles, -10), // Last 10 files
+        'galeri_db_count' => count($galeriDb),
+        'galeri_db_sample' => array_slice($galeriDb, -10),
+    ]);
+});
+
+Route::get('dev-log-test', function () {
+    try {
+        \Log::info('Dev Log Test Message');
+        $path = storage_path('logs/laravel.log');
+        return response()->json([
+            'success' => true,
+            'log_writable' => is_writable($path),
+            'log_owner' => fileowner($path),
+            'current_user' => posix_getpwuid(posix_geteuid())['name'] ?? 'unknown',
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
+});
+
+Route::get('dev-debug-logs', function () {
+    $path = storage_path('logs/custom_debug.log');
+    if (!file_exists($path)) {
+        return response()->json(['message' => 'No custom debug log file found'], 404);
+    }
+    $lines = file($path);
+    $last_lines = array_slice($lines, -150);
+    return response($last_lines, 200, ['Content-Type' => 'text/plain']);
+});
+
+Route::get('dev-debug-logs-clear', function () {
+    $path = storage_path('logs/custom_debug.log');
+    if (file_exists($path)) {
+        unlink($path);
+        return response()->json(['message' => 'Logs cleared']);
+    }
+    return response()->json(['message' => 'No logs to clear']);
+});
+
+Route::get('dev-diagnose', function () {
+    $logPath = storage_path('logs/custom_debug.log');
+    $editSeasonPath = base_path('app/Filament/Resources/SeasonResource/Pages/EditSeason.php');
+    
+    // Test write
+    $testWrite = @file_put_contents($logPath, date('Y-m-d H:i:s') . " - dev-diagnose test write\n", FILE_APPEND);
+    
+    // Read EditSeason.php to verify content
+    $editSeasonContent = file_exists($editSeasonPath) ? file_get_contents($editSeasonPath) : 'FILE NOT FOUND';
+    $hasMutateMethod = str_contains($editSeasonContent, 'mutateFormDataBeforeSave');
+    $hasAfterSave = str_contains($editSeasonContent, 'afterSave');
+    $hasDehydrate = false;
+    
+    // Check SeasonResource.php for dehydrateStateUsing
+    $resourcePath = base_path('app/Filament/Resources/SeasonResource.php');
+    if (file_exists($resourcePath)) {
+        $resourceContent = file_get_contents($resourcePath);
+        $hasDehydrate = str_contains($resourceContent, 'dehydrateStateUsing');
+    }
+    
+    // Check file permissions
+    $logExists = file_exists($logPath);
+    $logWritable = is_writable($logPath) || is_writable(dirname($logPath));
+    
+    return response()->json([
+        'edit_season_file_exists' => file_exists($editSeasonPath),
+        'has_mutateFormDataBeforeSave' => $hasMutateMethod,
+        'has_afterSave' => $hasAfterSave,
+        'has_dehydrateStateUsing' => $hasDehydrate,
+        'edit_season_md5' => file_exists($editSeasonPath) ? md5_file($editSeasonPath) : null,
+        'edit_season_content_preview' => file_exists($editSeasonPath) ? substr($editSeasonContent, 0, 2000) : null,
+        'log_exists' => $logExists,
+        'log_writable' => $logWritable,
+        'test_write_result' => $testWrite !== false ? 'SUCCESS (' . $testWrite . ' bytes)' : 'FAILED',
+        'current_user' => function_exists('posix_geteuid') ? (posix_getpwuid(posix_geteuid())['name'] ?? 'unknown') : php_sapi_name(),
+        'log_dir_writable' => is_writable(storage_path('logs')),
+    ]);
+});
+
+// Direct DB update for foto_utama (workaround)
+Route::get('dev-fix-foto/{seasonId}/{filename}', function ($seasonId, $filename) {
+    $season = App\Models\Season::find($seasonId);
+    if (!$season) {
+        return response()->json(['error' => 'Season not found'], 404);
+    }
+    $newPath = 'seasons/' . $filename;
+    $season->foto_utama = $newPath;
+    $season->save();
+    return response()->json([
+        'success' => true,
+        'season_id' => $season->id,
+        'new_foto_utama' => $season->foto_utama,
+        'file_exists' => file_exists(public_path('storage/' . $newPath)),
+    ]);
+});
+
+
+
+
 // ============================================================
 // AUTH
 // ============================================================
@@ -169,4 +302,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin,po,sc,event,huma
 
     // Laporan
     Route::get('laporan/ringkasan',     [AdminLaporanController::class, 'ringkasan']);
+});
+
+Route::get('test-seasons', function () {
+    return response()->json(App\Models\Season::all());
 });

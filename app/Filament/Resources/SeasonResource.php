@@ -85,18 +85,7 @@ class SeasonResource extends Resource
                                         ->label('Upload Foto Utama Lokal')
                                         ->disk('public')
                                         ->directory('seasons')
-                                        ->dehydrated(false)
-                                        ->reactive()
-                                        ->afterStateUpdated(function ($state, callable $set) {
-                                            if ($state) {
-                                                $file = is_array($state) ? array_values($state)[0] : $state;
-                                                if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                                                    $set('foto_utama', $file->getClientOriginalName());
-                                                }
-                                            } else {
-                                                $set('foto_utama', null);
-                                            }
-                                        })
+                                        ->dehydrated(true)
                                         ->formatStateUsing(fn ($record) => ($record && $record->foto_utama && !str_starts_with($record->foto_utama, 'http')) ? $record->foto_utama : null),
                                     Forms\Components\TextInput::make('foto_utama')
                                         ->label('Path Foto Utama / URL')
@@ -167,12 +156,19 @@ class SeasonResource extends Resource
 
                         Forms\Components\Repeater::make('galeri')
                             ->relationship('galeri')
+                            ->mutateRelationshipDataBeforeCreateUsing(function (array $data): array {
+                                unset($data['path_upload']);
+                                return $data;
+                            })
+                            ->mutateRelationshipDataBeforeSaveUsing(function (array $data): array {
+                                unset($data['path_upload']);
+                                return $data;
+                            })
                             ->schema([
                                 Forms\Components\FileUpload::make('path_upload')
                                     ->label('Upload Gambar Lokal')
                                     ->disk('public')
                                     ->directory('galeri')
-                                    ->dehydrated(false)
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set) {
                                         if ($state) {
