@@ -6,7 +6,6 @@ import { Mail, MapPin, Instagram, Sparkles, BookOpen, Target, Eye } from 'lucide
 
 const FAQ = [
   { q: 'Siapa yang bisa mengikuti kompetisi OSCAR 3.0?', a: 'Seluruh mahasiswa aktif jenjang D3/D4/S1/S2 dari seluruh perguruan tinggi negeri maupun swasta di Indonesia.' },
-  { q: 'Apakah ada biaya yang dikenakan dalam pendaftaran?',   a: 'Sama sekali tidak. Seluruh rangkaian pendaftaran cabang kompetisi di OSCAR 3.0 sepenuhnya GRATIS.' },
   { q: 'Bagaimana alur pendaftaran tim di platform?',       a: 'Cukup daftarkan akun baru, login ke portal peserta, pilih lomba, isi susunan tim beserta berkas pendukung, dan submit formulir.' },
   { q: 'Kapan pengumuman hasil pemenang kompetisi?',      a: 'Jadwal penilaian dan pengumuman pemenang tertera rinci pada halaman cabang lomba masing-masing secara berkala.' },
 ];
