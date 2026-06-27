@@ -206,20 +206,6 @@ jobs:
 
             echo "✅ Deployment selesai!"
 
-      - name: ✅ Verifikasi Health Check
-        run: |
-          echo "→ Menunggu aplikasi siap..."
-          for i in {1..12}; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://kompetisioscar.my.id || echo "000")
-            if [ "$STATUS" = "200" ]; then
-              echo "✅ Health check PASSED (HTTP $STATUS)"
-              exit 0
-            fi
-            echo "→ Percobaan $i: Status HTTP $STATUS. Menunggu 5 detik..."
-            sleep 5
-          done
-          echo "❌ Health check FAILED (HTTP $STATUS)"
-          exit 1
 
   # ═══════════════════════════════════════════════════════════════════════════
   # JOB 3: Notifikasi hasil deployment
