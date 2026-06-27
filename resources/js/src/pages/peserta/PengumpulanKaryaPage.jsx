@@ -168,9 +168,12 @@ export default function PengumpulanKaryaPage() {
     reader.readAsDataURL(file);
   };
 
-  const getTemaOptions = (slug, nama) => {
-    const s = slug || '';
-    const n = nama?.toLowerCase() || '';
+  const getTemaOptions = (lomba) => {
+    if (lomba?.tema_list && Array.isArray(lomba.tema_list) && lomba.tema_list.length > 0) {
+      return lomba.tema_list;
+    }
+    const s = lomba?.slug || '';
+    const n = lomba?.nama?.toLowerCase() || '';
 
     if (s === 'web-development' || n.includes('web')) {
       return [
@@ -502,9 +505,9 @@ export default function PengumpulanKaryaPage() {
                 className={INPUT_CLASS}
                 required
               >
-                <option value="" className="bg-[#0A1A0A] text-[#8B9A7A]">Pilih Tema Karya</option>
-                {getTemaOptions(lomba.slug, lomba.nama).map((t, idx) => (
-                  <option key={idx} value={t} className="bg-[#0D1E0D] text-white text-xs">{t}</option>
+                <option value="" className="bg-[#0A1A0A] text-[#8B9A7A]">-- Pilih Tema --</option>
+                {getTemaOptions(pendaftaran?.lomba).map((t, idx) => (
+                  <option key={idx} value={t} className="bg-[#0D1E0D] text-white">{t}</option>
                 ))}
               </select>
             </div>

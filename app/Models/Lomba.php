@@ -27,11 +27,13 @@ class Lomba extends Model
         'status',
         'booklet_path',
         'banner_path',
-        'surat_izin_path'
+        'surat_izin_path',
+        'tema_list'
     ];
 
     protected $casts = [
-        'deadline' => 'datetime',
+        'deadline'  => 'datetime',
+        'tema_list' => 'array',
     ];
 
     protected $appends = [

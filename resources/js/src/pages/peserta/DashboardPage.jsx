@@ -271,7 +271,11 @@ export default function PesertaDashboardPage() {
   const isPosterOrInfo = selectedLomba?.slug === 'desain-poster' || selectedLomba?.slug === 'desain-infografis' || selectedLomba?.nama?.toLowerCase().includes('poster') || selectedLomba?.nama?.toLowerCase().includes('infografis');
 
 
-  const getTemaOptions = (slug) => {
+  const getTemaOptions = (lomba) => {
+    if (lomba?.tema_list && Array.isArray(lomba.tema_list) && lomba.tema_list.length > 0) {
+      return lomba.tema_list;
+    }
+    const slug = lomba?.slug;
     if (slug === 'web-development') {
       return [
         'Teknologi Hijau & Konservasi Alam (Green Tech)',
@@ -718,7 +722,7 @@ export default function PesertaDashboardPage() {
                         required
                       >
                         <option value="" className="bg-[#0A1A0A] text-[#8B9A7A]">Pilih Tema Karya</option>
-                        {getTemaOptions(lomba.slug, lomba.nama).map((t, idx) => (
+                        {getTemaOptions(activeRegistration?.lomba).map((t, idx) => (
                           <option key={idx} value={t} className="bg-[#0D1E0D] text-white text-xs">{t}</option>
                         ))}
                       </select>
@@ -1726,7 +1730,7 @@ export default function PesertaDashboardPage() {
                 required
               >
                 <option value="" className="bg-[#0A1A0A] text-[#8B9A7A]">-- Pilih Tema Lomba --</option>
-                {getTemaOptions(selectedLomba?.slug).map((option) => (
+                {getTemaOptions(selectedLomba).map((option) => (
                   <option key={option} value={option} className="bg-[#0D1E0D] text-white">{option}</option>
                 ))}
               </Input>

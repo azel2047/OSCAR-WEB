@@ -25,6 +25,7 @@ class LombaResource extends JsonResource
             'kuota'       => $this->kuota,
             'terdaftar'   => $this->terdaftar,
             'status'      => $this->status,
+            'tema_list'   => $this->tema_list,
             'booklet_url' => $this->booklet_url,
             'banner_url'  => $this->banner_url,
             'surat_izin_url' => $this->surat_izin_url,

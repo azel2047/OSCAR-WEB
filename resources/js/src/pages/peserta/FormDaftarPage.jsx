@@ -109,7 +109,11 @@ export default function FormDaftarPage() {
   const isCTF = selectedLomba?.slug === 'ctf' || selectedLomba?.nama?.toLowerCase().includes('ctf');
   const isPosterOrInfo = selectedLomba?.slug === 'desain-poster' || selectedLomba?.slug === 'desain-infografis' || selectedLomba?.nama?.toLowerCase().includes('poster') || selectedLomba?.nama?.toLowerCase().includes('infografis');
 
-  const getTemaOptions = (slug) => {
+  const getTemaOptions = (lomba) => {
+    if (lomba?.tema_list && Array.isArray(lomba.tema_list) && lomba.tema_list.length > 0) {
+      return lomba.tema_list;
+    }
+    const slug = lomba?.slug;
     if (slug === 'web-development') {
       return [
         'Teknologi Hijau & Konservasi Alam (Green Tech)',
@@ -566,7 +570,7 @@ export default function FormDaftarPage() {
                 required
               >
                 <option value="" className="bg-[#0A1A0A] text-[#8B9A7A]">-- Pilih Tema Lomba --</option>
-                {getTemaOptions(selectedLomba?.slug).map((option) => (
+                {getTemaOptions(selectedLomba).map((option) => (
                   <option key={option} value={option} className="bg-[#0D1E0D] text-white">{option}</option>
                 ))}
               </Input>

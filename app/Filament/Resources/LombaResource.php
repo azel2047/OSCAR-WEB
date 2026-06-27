@@ -85,6 +85,11 @@ class LombaResource extends Resource
                                     ->label('Deskripsi Lengkap Lomba')
                                     ->required()
                                     ->columnSpanFull(),
+                                Forms\Components\TagsInput::make('tema_list')
+                                    ->label('Daftar Tema Lomba')
+                                    ->helperText('Ketik tema dan tekan Enter. Biarkan kosong jika tidak ada pilihan tema.')
+                                    ->placeholder('Misal: Web App, Mobile App...')
+                                    ->columnSpanFull(),
                             ]),
 
                         Tab::make('Persyaratan & Aturan')
