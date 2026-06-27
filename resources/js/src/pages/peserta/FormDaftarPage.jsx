@@ -36,6 +36,7 @@ export default function FormDaftarPage() {
   const [isSuccessScreen, setIsSuccessScreen] = useState(false);
   const [showAnggota2, setShowAnggota2] = useState(false);
   const [showAnggota3, setShowAnggota3] = useState(false);
+  const [showAnggota4, setShowAnggota4] = useState(false);
   const [syaratList, setSyaratList] = useState([]);
 
   // Form Fields
@@ -47,6 +48,7 @@ export default function FormDaftarPage() {
     nama_peserta_1: user?.nama || user?.name || '',
     nama_peserta_2: '',
     nama_peserta_3: '',
+    nama_peserta_4: '',
     no_wa: '',
     no_wa_pendamping: '',
     nama_pendamping: '',
@@ -179,13 +181,16 @@ export default function FormDaftarPage() {
     if (isWebDev) {
       fd.append('asal_sekolah', formData.asal_sekolah);
       fd.append('nama_peserta_1', formData.nama_peserta_1);
-      fd.append('nama_peserta_2', formData.nama_peserta_2);
+      if (formData.nama_peserta_2) fd.append('nama_peserta_2', formData.nama_peserta_2);
+      if (formData.nama_peserta_3) fd.append('nama_peserta_3', formData.nama_peserta_3);
+      if (formData.nama_peserta_4) fd.append('nama_peserta_4', formData.nama_peserta_4);
       fd.append('nama_pendamping', formData.nama_pendamping);
     } else if (isCTF) {
       fd.append('asal_universitas', formData.asal_universitas);
       fd.append('nama_peserta_1', formData.nama_peserta_1);
       if (formData.nama_peserta_2) fd.append('nama_peserta_2', formData.nama_peserta_2);
       if (formData.nama_peserta_3) fd.append('nama_peserta_3', formData.nama_peserta_3);
+      if (formData.nama_peserta_4) fd.append('nama_peserta_4', formData.nama_peserta_4);
     } else if (isPosterOrInfo) {
       fd.append('asal_sekolah', formData.asal_sekolah);
       fd.append('nama_peserta_1', formData.nama_peserta_1);
@@ -421,6 +426,10 @@ export default function FormDaftarPage() {
                       onClick={() => {
                         setShowAnggota2(false);
                         setFormData(p => ({ ...p, nama_peserta_2: '' }));
+                        setShowAnggota3(false);
+                        setFormData(p => ({ ...p, nama_peserta_3: '' }));
+                        setShowAnggota4(false);
+                        setFormData(p => ({ ...p, nama_peserta_4: '' }));
                       }}
                       className="absolute right-0 top-0 text-[10px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
                     >
@@ -440,13 +449,13 @@ export default function FormDaftarPage() {
                 )
               )}
 
-              {isCTF && showAnggota2 && (
+              {!isPosterOrInfo && showAnggota2 && (
                 showAnggota3 ? (
                   <div className="relative">
                     <Input
                       label="NAMA ANGGOTA 3"
                       name="nama_peserta_3"
-                      placeholder="Khusus CTF (Opsional)"
+                      placeholder="Nama lengkap anggota 3 (Opsional)"
                       value={formData.nama_peserta_3}
                       onChange={handleTextChange}
                       className={INPUT_CLASS}
@@ -456,6 +465,8 @@ export default function FormDaftarPage() {
                       onClick={() => {
                         setShowAnggota3(false);
                         setFormData(p => ({ ...p, nama_peserta_3: '' }));
+                        setShowAnggota4(false);
+                        setFormData(p => ({ ...p, nama_peserta_4: '' }));
                       }}
                       className="absolute right-0 top-0 text-[10px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
                     >
@@ -470,6 +481,41 @@ export default function FormDaftarPage() {
                       className="w-full py-3.5 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
                     >
                       + Tambah Anggota 3
+                    </button>
+                  </div>
+                )
+              )}
+
+              {!isPosterOrInfo && showAnggota3 && (
+                showAnggota4 ? (
+                  <div className="relative">
+                    <Input
+                      label="NAMA ANGGOTA 4"
+                      name="nama_peserta_4"
+                      placeholder="Nama lengkap anggota 4 (Opsional)"
+                      value={formData.nama_peserta_4}
+                      onChange={handleTextChange}
+                      className={INPUT_CLASS}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAnggota4(false);
+                        setFormData(p => ({ ...p, nama_peserta_4: '' }));
+                      }}
+                      className="absolute right-0 top-0 text-[10px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
+                    >
+                      [ Hapus ]
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setShowAnggota4(true)}
+                      className="w-full py-3.5 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+                    >
+                      + Tambah Anggota 4
                     </button>
                   </div>
                 )

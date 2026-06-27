@@ -35,6 +35,8 @@ class StorePendaftaranRequest extends FormRequest
                 $rules['asal_sekolah']     = 'required|string|min:3|max:150';
                 $rules['nama_peserta_1']   = 'required|string|min:3|max:100';
                 $rules['nama_peserta_2']   = 'nullable|string|max:100';
+                $rules['nama_peserta_3']   = 'nullable|string|max:100';
+                $rules['nama_peserta_4']   = 'nullable|string|max:100';
                 $rules['nama_pendamping']  = 'required|string|min:3|max:100';
             } elseif (in_array($lomba->slug, ['desain-poster', 'desain-infografis'])) {
                 $rules['asal_sekolah']     = 'required|string|min:3|max:150';
@@ -44,6 +46,7 @@ class StorePendaftaranRequest extends FormRequest
                 $rules['nama_peserta_1']   = 'required|string|min:3|max:100';
                 $rules['nama_peserta_2']   = 'nullable|string|max:100';
                 $rules['nama_peserta_3']   = 'nullable|string|max:100';
+                $rules['nama_peserta_4']   = 'nullable|string|max:100';
             }
         }
 

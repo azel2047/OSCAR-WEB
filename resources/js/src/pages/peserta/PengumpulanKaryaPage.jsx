@@ -24,6 +24,8 @@ export default function PengumpulanKaryaPage() {
   const [pengumpulan, setPengumpulan] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [showAnggota2, setShowAnggota2] = useState(false);
+  const [showAnggota3, setShowAnggota3] = useState(false);
+  const [showAnggota4, setShowAnggota4] = useState(false);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -35,6 +37,8 @@ export default function PengumpulanKaryaPage() {
     nama_pendamping: '',
     nama_peserta_1: '',
     nama_peserta_2: '',
+    nama_peserta_3: '',
+    nama_peserta_4: '',
     link_github: '',
     folder_proposal: '',
     // Poster / Infografis fields
@@ -77,6 +81,8 @@ export default function PengumpulanKaryaPage() {
             nama_pendamping: pengumpulanData.data_karya?.nama_pendamping || '',
             nama_peserta_1: pengumpulanData.data_karya?.nama_peserta_1 || '',
             nama_peserta_2: pengumpulanData.data_karya?.nama_peserta_2 || '',
+            nama_peserta_3: pengumpulanData.data_karya?.nama_peserta_3 || '',
+            nama_peserta_4: pengumpulanData.data_karya?.nama_peserta_4 || '',
             link_github: pengumpulanData.data_karya?.link_github || '',
             folder_proposal: pengumpulanData.data_karya?.folder_proposal || '',
             nama_peserta: pengumpulanData.data_karya?.nama_peserta || '',
@@ -98,6 +104,8 @@ export default function PengumpulanKaryaPage() {
             nama_pendamping: regData.nama_pendamping || '',
             nama_peserta_1: regData.nama_peserta_1 || user?.nama || '',
             nama_peserta_2: regData.nama_peserta_2 || '',
+            nama_peserta_3: regData.nama_peserta_3 || '',
+            nama_peserta_4: regData.nama_peserta_4 || '',
             link_github: '',
             folder_proposal: '',
             nama_peserta: regData.nama_peserta_1 || user?.nama || '',
@@ -121,7 +129,9 @@ export default function PengumpulanKaryaPage() {
   // Prefill toggle states when data is loaded
   useEffect(() => {
     if (formData.nama_peserta_2) setShowAnggota2(true);
-  }, [formData.nama_peserta_2]);
+    if (formData.nama_peserta_3) setShowAnggota3(true);
+    if (formData.nama_peserta_4) setShowAnggota4(true);
+  }, [formData.nama_peserta_2, formData.nama_peserta_3, formData.nama_peserta_4]);
 
   // Animations
   useEffect(() => {
@@ -206,11 +216,18 @@ export default function PengumpulanKaryaPage() {
 
     if (isWebDev) {
       fd.append('nama_kelompok', formData.nama_kelompok);
-      fd.append('nama_pendamping', formData.nama_pendamping);
       fd.append('nama_peserta_1', formData.nama_peserta_1);
-      fd.append('nama_peserta_2', formData.nama_peserta_2);
+      if (formData.nama_peserta_2) fd.append('nama_peserta_2', formData.nama_peserta_2);
+      if (formData.nama_peserta_3) fd.append('nama_peserta_3', formData.nama_peserta_3);
+      if (formData.nama_peserta_4) fd.append('nama_peserta_4', formData.nama_peserta_4);
       fd.append('link_github', formData.link_github);
       fd.append('folder_proposal', formData.folder_proposal);
+      fd.append('nama_pendamping', formData.nama_pendamping);
+      fd.append('nama_sekolah', formData.nama_sekolah);
+      fd.append('link_karya_gdrive', formData.link_karya_gdrive);
+      if (buktiInstagram) {
+        fd.append('bukti_instagram', buktiInstagram);
+      }
     } else {
       fd.append('nama_peserta', formData.nama_peserta);
       fd.append('nama_sekolah', formData.nama_sekolah);
@@ -377,6 +394,14 @@ export default function PengumpulanKaryaPage() {
                     <span className="text-[10px] font-mono font-bold text-[#8B9A7A] uppercase flex items-center gap-1"><User size={10} /> Nama Peserta 2</span>
                     <p className="text-white text-sm font-semibold">{pengumpulan.data_karya?.nama_peserta_2 || '-'}</p>
                   </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-mono font-bold text-[#8B9A7A] uppercase flex items-center gap-1"><User size={10} /> Nama Peserta 3</span>
+                    <p className="text-white text-sm font-semibold">{pengumpulan.data_karya?.nama_peserta_3 || '-'}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-mono font-bold text-[#8B9A7A] uppercase flex items-center gap-1"><User size={10} /> Nama Peserta 4</span>
+                    <p className="text-white text-sm font-semibold">{pengumpulan.data_karya?.nama_peserta_4 || '-'}</p>
+                  </div>
                   <div className="sm:col-span-2 space-y-2.5">
                     <span className="text-[10px] font-mono font-bold text-[#8B9A7A] uppercase flex items-center gap-1"><Github size={10} /> Link Repositori GitHub</span>
                     <a href={pengumpulan.data_karya?.link_github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-[#00ffc8]/50 hover:bg-white/[0.04] transition-all text-[#00ffc8] text-xs font-semibold select-all">
@@ -524,14 +549,14 @@ export default function PengumpulanKaryaPage() {
                   />
                 </div>
                 {showAnggota2 ? (
-                  <div className="space-y-2 relative">
-                    <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Nama Peserta 2 (Anggota)</label>
+                  <div className="space-y-1 relative">
+                    <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Nama Peserta 2 (Anggota)</label>
                     <input
                       type="text"
                       name="nama_peserta_2"
                       value={formData.nama_peserta_2}
                       onChange={handleTextChange}
-                      placeholder="Nama lengkap Peserta 2"
+                      placeholder="Nama lengkap Anggota 2"
                       className={INPUT_CLASS}
                     />
                     <button
@@ -539,8 +564,12 @@ export default function PengumpulanKaryaPage() {
                       onClick={() => {
                         setShowAnggota2(false);
                         setFormData(p => ({ ...p, nama_peserta_2: '' }));
+                        setShowAnggota3(false);
+                        setFormData(p => ({ ...p, nama_peserta_3: '' }));
+                        setShowAnggota4(false);
+                        setFormData(p => ({ ...p, nama_peserta_4: '' }));
                       }}
-                      className="absolute right-0 top-0 text-[10px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
+                      className="absolute right-0 top-0 text-[9px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
                     >
                       [ Hapus ]
                     </button>
@@ -550,11 +579,85 @@ export default function PengumpulanKaryaPage() {
                     <button
                       type="button"
                       onClick={() => setShowAnggota2(true)}
-                      className="w-full py-3.5 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+                      className="w-full py-3 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
                     >
                       + Tambah Anggota 2
                     </button>
                   </div>
+                )}
+
+                {showAnggota2 && (
+                  showAnggota3 ? (
+                    <div className="space-y-1 relative">
+                      <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Nama Peserta 3 (Anggota)</label>
+                      <input
+                        type="text"
+                        name="nama_peserta_3"
+                        value={formData.nama_peserta_3}
+                        onChange={handleTextChange}
+                        placeholder="Nama lengkap Anggota 3"
+                        className={INPUT_CLASS}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAnggota3(false);
+                          setFormData(p => ({ ...p, nama_peserta_3: '' }));
+                          setShowAnggota4(false);
+                          setFormData(p => ({ ...p, nama_peserta_4: '' }));
+                        }}
+                        className="absolute right-0 top-0 text-[9px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
+                      >
+                        [ Hapus ]
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setShowAnggota3(true)}
+                        className="w-full py-3 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+                      >
+                        + Tambah Anggota 3
+                      </button>
+                    </div>
+                  )
+                )}
+
+                {showAnggota3 && (
+                  showAnggota4 ? (
+                    <div className="space-y-1 relative">
+                      <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Nama Peserta 4 (Anggota)</label>
+                      <input
+                        type="text"
+                        name="nama_peserta_4"
+                        value={formData.nama_peserta_4}
+                        onChange={handleTextChange}
+                        placeholder="Nama lengkap Anggota 4"
+                        className={INPUT_CLASS}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAnggota4(false);
+                          setFormData(p => ({ ...p, nama_peserta_4: '' }));
+                        }}
+                        className="absolute right-0 top-0 text-[9px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
+                      >
+                        [ Hapus ]
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setShowAnggota4(true)}
+                        className="w-full py-3 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+                      >
+                        + Tambah Anggota 4
+                      </button>
+                    </div>
+                  )
                 )}
 
                 <div className="sm:col-span-2 space-y-2">

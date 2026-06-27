@@ -45,7 +45,10 @@ export default function PesertaDashboardPage() {
   const [showRevisionForm, setShowRevisionForm] = useState(false);
   const [showAnggota2, setShowAnggota2] = useState(false);
   const [showAnggota3, setShowAnggota3] = useState(false);
+  const [showAnggota4, setShowAnggota4] = useState(false);
   const [showKaryaAnggota2, setShowKaryaAnggota2] = useState(false);
+  const [showKaryaAnggota3, setShowKaryaAnggota3] = useState(false);
+  const [showKaryaAnggota4, setShowKaryaAnggota4] = useState(false);
 
   // Form Fields
   const [formData, setFormData] = useState({
@@ -56,6 +59,7 @@ export default function PesertaDashboardPage() {
     nama_peserta_1: user?.nama || user?.name || '',
     nama_peserta_2: '',
     nama_peserta_3: '',
+    nama_peserta_4: '',
     no_wa: '',
     no_wa_pendamping: '',
     nama_pendamping: '',
@@ -82,6 +86,8 @@ export default function PesertaDashboardPage() {
     nama_pendamping: '',
     nama_peserta_1: '',
     nama_peserta_2: '',
+    nama_peserta_3: '',
+    nama_peserta_4: '',
     link_github: '',
     folder_proposal: '',
     nama_peserta: '',
@@ -109,11 +115,14 @@ export default function PesertaDashboardPage() {
   useEffect(() => {
     if (formData.nama_peserta_2) setShowAnggota2(true);
     if (formData.nama_peserta_3) setShowAnggota3(true);
-  }, [formData.nama_peserta_2, formData.nama_peserta_3]);
+    if (formData.nama_peserta_4) setShowAnggota4(true);
+  }, [formData.nama_peserta_2, formData.nama_peserta_3, formData.nama_peserta_4]);
 
   useEffect(() => {
     if (karyaForm.nama_peserta_2) setShowKaryaAnggota2(true);
-  }, [karyaForm.nama_peserta_2]);
+    if (karyaForm.nama_peserta_3) setShowKaryaAnggota3(true);
+    if (karyaForm.nama_peserta_4) setShowKaryaAnggota4(true);
+  }, [karyaForm.nama_peserta_2, karyaForm.nama_peserta_3, karyaForm.nama_peserta_4]);
 
   useEffect(() => {
     if (activeRegistration && activeRegistration.status === 'diverifikasi') {
@@ -317,13 +326,16 @@ export default function PesertaDashboardPage() {
     if (isWebDev) {
       fd.append('asal_sekolah', formData.asal_sekolah);
       fd.append('nama_peserta_1', formData.nama_peserta_1);
-      fd.append('nama_peserta_2', formData.nama_peserta_2);
+      if (formData.nama_peserta_2) fd.append('nama_peserta_2', formData.nama_peserta_2);
+      if (formData.nama_peserta_3) fd.append('nama_peserta_3', formData.nama_peserta_3);
+      if (formData.nama_peserta_4) fd.append('nama_peserta_4', formData.nama_peserta_4);
       fd.append('nama_pendamping', formData.nama_pendamping);
     } else if (isCTF) {
       fd.append('asal_universitas', formData.asal_universitas);
       fd.append('nama_peserta_1', formData.nama_peserta_1);
       if (formData.nama_peserta_2) fd.append('nama_peserta_2', formData.nama_peserta_2);
       if (formData.nama_peserta_3) fd.append('nama_peserta_3', formData.nama_peserta_3);
+      if (formData.nama_peserta_4) fd.append('nama_peserta_4', formData.nama_peserta_4);
     } else if (isPosterOrInfo) {
       fd.append('asal_sekolah', formData.asal_sekolah);
       fd.append('nama_peserta_1', formData.nama_peserta_1);
@@ -758,7 +770,7 @@ export default function PesertaDashboardPage() {
                               name="nama_peserta_2"
                               value={karyaForm.nama_peserta_2}
                               onChange={handleKaryaTextChange}
-                              placeholder="Nama lengkap Anggota"
+                              placeholder="Nama lengkap Anggota 2"
                               className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
                             />
                             <button
@@ -766,6 +778,10 @@ export default function PesertaDashboardPage() {
                               onClick={() => {
                                 setShowKaryaAnggota2(false);
                                 setKaryaForm(p => ({ ...p, nama_peserta_2: '' }));
+                                setShowKaryaAnggota3(false);
+                                setKaryaForm(p => ({ ...p, nama_peserta_3: '' }));
+                                setShowKaryaAnggota4(false);
+                                setKaryaForm(p => ({ ...p, nama_peserta_4: '' }));
                               }}
                               className="absolute right-0 top-0 text-[9px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
                             >
@@ -782,6 +798,80 @@ export default function PesertaDashboardPage() {
                               + Tambah Anggota 2
                             </button>
                           </div>
+                        )}
+
+                        {showKaryaAnggota2 && (
+                          showKaryaAnggota3 ? (
+                            <div className="space-y-1 relative">
+                              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Nama Peserta 3 (Anggota)</label>
+                              <input
+                                type="text"
+                                name="nama_peserta_3"
+                                value={karyaForm.nama_peserta_3}
+                                onChange={handleKaryaTextChange}
+                                placeholder="Nama lengkap Anggota 3"
+                                className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setShowKaryaAnggota3(false);
+                                  setKaryaForm(p => ({ ...p, nama_peserta_3: '' }));
+                                  setShowKaryaAnggota4(false);
+                                  setKaryaForm(p => ({ ...p, nama_peserta_4: '' }));
+                                }}
+                                className="absolute right-0 top-0 text-[9px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
+                              >
+                                [ Hapus ]
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col justify-end">
+                              <button
+                                type="button"
+                                onClick={() => setShowKaryaAnggota3(true)}
+                                className="w-full py-3 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+                              >
+                                + Tambah Anggota 3
+                              </button>
+                            </div>
+                          )
+                        )}
+
+                        {showKaryaAnggota3 && (
+                          showKaryaAnggota4 ? (
+                            <div className="space-y-1 relative">
+                              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B9A7A]">Nama Peserta 4 (Anggota)</label>
+                              <input
+                                type="text"
+                                name="nama_peserta_4"
+                                value={karyaForm.nama_peserta_4}
+                                onChange={handleKaryaTextChange}
+                                placeholder="Nama lengkap Anggota 4"
+                                className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 focus:border-[#00ffc8] focus:ring-1 focus:ring-[#00ffc8]/50 outline-none text-white text-xs placeholder:text-[#8B9A7A]"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setShowKaryaAnggota4(false);
+                                  setKaryaForm(p => ({ ...p, nama_peserta_4: '' }));
+                                }}
+                                className="absolute right-0 top-0 text-[9px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
+                              >
+                                [ Hapus ]
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col justify-end">
+                              <button
+                                type="button"
+                                onClick={() => setShowKaryaAnggota4(true)}
+                                className="w-full py-3 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+                              >
+                                + Tambah Anggota 4
+                              </button>
+                            </div>
+                          )
                         )}
 
                         <div className="sm:col-span-2 space-y-1">
@@ -1495,6 +1585,10 @@ export default function PesertaDashboardPage() {
                       onClick={() => {
                         setShowAnggota2(false);
                         setFormData(p => ({ ...p, nama_peserta_2: '' }));
+                        setShowAnggota3(false);
+                        setFormData(p => ({ ...p, nama_peserta_3: '' }));
+                        setShowAnggota4(false);
+                        setFormData(p => ({ ...p, nama_peserta_4: '' }));
                       }}
                       className="absolute right-0 top-0 text-[10px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
                     >
@@ -1514,13 +1608,13 @@ export default function PesertaDashboardPage() {
                 )
               )}
 
-              {isCTF && showAnggota2 && (
+              {!isPosterOrInfo && showAnggota2 && (
                 showAnggota3 ? (
                   <div className="relative">
                     <Input
                       label="NAMA ANGGOTA 3"
                       name="nama_peserta_3"
-                      placeholder="Khusus CTF (Opsional)"
+                      placeholder="Nama lengkap anggota 3 (Opsional)"
                       value={formData.nama_peserta_3}
                       onChange={handleTextChange}
                       className={INPUT_CLASS}
@@ -1530,6 +1624,8 @@ export default function PesertaDashboardPage() {
                       onClick={() => {
                         setShowAnggota3(false);
                         setFormData(p => ({ ...p, nama_peserta_3: '' }));
+                        setShowAnggota4(false);
+                        setFormData(p => ({ ...p, nama_peserta_4: '' }));
                       }}
                       className="absolute right-0 top-0 text-[10px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
                     >
@@ -1544,6 +1640,41 @@ export default function PesertaDashboardPage() {
                       className="w-full py-3.5 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
                     >
                       + Tambah Anggota 3
+                    </button>
+                  </div>
+                )
+              )}
+
+              {!isPosterOrInfo && showAnggota3 && (
+                showAnggota4 ? (
+                  <div className="relative">
+                    <Input
+                      label="NAMA ANGGOTA 4"
+                      name="nama_peserta_4"
+                      placeholder="Nama lengkap anggota 4 (Opsional)"
+                      value={formData.nama_peserta_4}
+                      onChange={handleTextChange}
+                      className={INPUT_CLASS}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAnggota4(false);
+                        setFormData(p => ({ ...p, nama_peserta_4: '' }));
+                      }}
+                      className="absolute right-0 top-0 text-[10px] font-mono font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
+                    >
+                      [ Hapus ]
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setShowAnggota4(true)}
+                      className="w-full py-3.5 rounded-xl border border-dashed border-[#00ffc8]/30 hover:border-[#00ffc8] text-[#00ffc8] hover:bg-[#00ffc8]/5 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+                    >
+                      + Tambah Anggota 4
                     </button>
                   </div>
                 )

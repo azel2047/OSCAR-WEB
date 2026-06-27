@@ -103,6 +103,8 @@ class PengumpulanKaryaController extends Controller
             $rules['nama_pendamping'] = 'required|string|max:100';
             $rules['nama_peserta_1']  = 'required|string|max:100';
             $rules['nama_peserta_2']  = 'nullable|string|max:100';
+            $rules['nama_peserta_3']  = 'nullable|string|max:100';
+            $rules['nama_peserta_4']  = 'nullable|string|max:100';
             $rules['link_github']     = 'required|url|max:255';
             $rules['folder_proposal'] = 'required|string|max:255';
         } elseif ($isPosterOrInfo) {
@@ -137,6 +139,8 @@ class PengumpulanKaryaController extends Controller
                 'nama_pendamping' => $request->input('nama_pendamping'),
                 'nama_peserta_1'  => $request->input('nama_peserta_1'),
                 'nama_peserta_2'  => $request->input('nama_peserta_2'),
+                'nama_peserta_3'  => $request->input('nama_peserta_3'),
+                'nama_peserta_4'  => $request->input('nama_peserta_4'),
                 'link_github'     => $request->input('link_github'),
                 'folder_proposal' => $request->input('folder_proposal'),
             ];
