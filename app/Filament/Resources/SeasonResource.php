@@ -85,19 +85,6 @@ class SeasonResource extends Resource
                                     ->label('Upload Foto Utama Lokal')
                                     ->disk('public')
                                     ->directory('seasons')
-                                    ->live()
-                                    ->dehydrated(false)
-                                    ->afterStateUpdated(function ($state, callable $set) {
-                                        if (is_array($state)) {
-                                            $state = array_values($state)[0] ?? null;
-                                        }
-                                        if ($state instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                                            $path = $state->store('seasons', 'public');
-                                            $set('foto_utama', $path);
-                                        } elseif (is_string($state)) {
-                                            $set('foto_utama', $state);
-                                        }
-                                    })
                                     ->formatStateUsing(fn ($record) => ($record && $record->foto_utama && !str_starts_with($record->foto_utama, 'http')) ? $record->foto_utama : null),
                                 Forms\Components\TextInput::make('foto_utama')
                                     ->label('Path Foto Utama / URL')
@@ -174,19 +161,6 @@ class SeasonResource extends Resource
                                     ->label('Upload Gambar Lokal')
                                     ->disk('public')
                                     ->directory('galeri')
-                                    ->live()
-                                    ->dehydrated(false)
-                                    ->afterStateUpdated(function ($state, callable $set) {
-                                        if (is_array($state)) {
-                                            $state = array_values($state)[0] ?? null;
-                                        }
-                                        if ($state instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                                            $path = $state->store('galeri', 'public');
-                                            $set('path', $path);
-                                        } elseif (is_string($state)) {
-                                            $set('path', $state);
-                                        }
-                                    })
                                     ->formatStateUsing(fn ($record) => ($record && $record->path && !str_starts_with($record->path, 'http')) ? $record->path : null),
                                 Forms\Components\TextInput::make('path')
                                     ->label('Path Gambar / URL')
