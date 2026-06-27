@@ -147,6 +147,12 @@ Route::get('dev-diagnose', function () {
     ]);
 });
 
+Route::get('dump-log', function () {
+    $path = public_path('debug_edit_season.log');
+    if (!file_exists($path)) return response()->json(['message' => 'No debug log found']);
+    return response()->file($path, ['Content-Type' => 'text/plain']);
+});
+
 // Direct DB update for foto_utama (workaround)
 Route::get('dev-fix-foto/{seasonId}/{filename}', function ($seasonId, $filename) {
     $season = App\Models\Season::find($seasonId);
