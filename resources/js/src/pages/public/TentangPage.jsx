@@ -149,8 +149,8 @@ export default function TentangPage() {
         <section className="py-20 px-6 sm:px-12 relative z-10 border-t border-[#70C492]/10">
           <div className="max-w-[1600px] mx-auto vm-container grid lg:grid-cols-2 gap-8">
             {[
-              { title: 'Visi Agung Kami', icon: Eye, desc: 'Menjadi wadah inkubasi kompetisi ilmiah terdepan di Indonesia yang menstimulasi lahirnya penemu serta ilmuwan muda andal penyelesai masalah masa depan.' },
-              { title: 'Misi Utama Kami', icon: Target, desc: 'Menyelenggarakan penilaian kompetisi berstandar integritas tinggi secara jujur, meluaskan jangkauan riset ilmiah ke ranah institusi daerah, dan membangun konektivitas kolaboratif.' },
+              { title: 'Visi Kami', icon: Eye, desc: 'Menjadi wadah inkubasi kompetisi ilmiah terdepan di Indonesia yang menstimulasi lahirnya penemu serta ilmuwan muda andal penyelesai masalah masa depan.' },
+              { title: 'Misi Kami', icon: Target, desc: 'Menyelenggarakan penilaian kompetisi berstandar integritas tinggi secara jujur, meluaskan jangkauan riset ilmiah ke ranah institusi daerah, dan membangun konektivitas kolaboratif.' },
             ].map((item) => {
               const Icon = item.icon;
               return (
@@ -219,11 +219,11 @@ export default function TentangPage() {
                   Ada pertanyaan lebih lanjut mengenai proposal, kerja sama, sponsorship, maupun panduan administrasi? Silakan hubungi kami.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-8 text-white text-sm font-mono">
-                  <a href="mailto:info@oscar.id" className="flex items-center gap-2 hover:text-[#70C492] transition-colors duration-300">
+                  <a href="mailto:kompetisi.oscar@gmail.com" className="flex items-center gap-2 hover:text-[#70C492] transition-colors duration-300">
                     <div className="w-9 h-9 rounded-xl bg-[#70C492]/5 border border-[#70C492]/20 flex items-center justify-center">
                       <Mail size={14} className="text-[#70C492]" />
                     </div>
-                    info@oscar.id
+                    kompetisi.oscar@gmail.com
                   </a>
                   <span className="flex items-center gap-2">
                     <div className="w-9 h-9 rounded-xl bg-[#79C199]/5 border border-[#79C199]/20 flex items-center justify-center">
@@ -235,7 +235,7 @@ export default function TentangPage() {
                     <div className="w-9 h-9 rounded-xl bg-[#70C492]/5 border border-[#70C492]/20 flex items-center justify-center">
                       <Instagram size={14} className="text-[#70C492]" />
                     </div>
-                    @oscar.official
+                    @oscar3.0_
                   </a>
                 </div>
               </div>
