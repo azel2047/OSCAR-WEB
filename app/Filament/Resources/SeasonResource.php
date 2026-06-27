@@ -86,7 +86,11 @@ class SeasonResource extends Resource
                                     ->disk('public')
                                     ->directory('seasons')
                                     ->live()
+                                    ->dehydrated(false)
                                     ->afterStateUpdated(function ($state, callable $set) {
+                                        if (is_array($state)) {
+                                            $state = array_values($state)[0] ?? null;
+                                        }
                                         if ($state instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
                                             $path = $state->store('seasons', 'public');
                                             $set('foto_utama', $path);
@@ -171,7 +175,11 @@ class SeasonResource extends Resource
                                     ->disk('public')
                                     ->directory('galeri')
                                     ->live()
+                                    ->dehydrated(false)
                                     ->afterStateUpdated(function ($state, callable $set) {
+                                        if (is_array($state)) {
+                                            $state = array_values($state)[0] ?? null;
+                                        }
                                         if ($state instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
                                             $path = $state->store('galeri', 'public');
                                             $set('path', $path);
