@@ -85,6 +85,14 @@ class SeasonResource extends Resource
                                     ->label('Upload Foto Utama Lokal')
                                     ->disk('public')
                                     ->directory('seasons')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if ($state) {
+                                            $set('foto_utama', '(File baru akan diproses saat Save)');
+                                        } else {
+                                            $set('foto_utama', null);
+                                        }
+                                    })
                                     ->formatStateUsing(fn ($record) => ($record && $record->foto_utama && !str_starts_with($record->foto_utama, 'http')) ? $record->foto_utama : null),
                                 Forms\Components\TextInput::make('foto_utama')
                                     ->label('Path Foto Utama / URL')
@@ -161,6 +169,14 @@ class SeasonResource extends Resource
                                     ->label('Upload Gambar Lokal')
                                     ->disk('public')
                                     ->directory('galeri')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if ($state) {
+                                            $set('path', '(File baru akan diproses saat Save)');
+                                        } else {
+                                            $set('path', null);
+                                        }
+                                    })
                                     ->formatStateUsing(fn ($record) => ($record && $record->path && !str_starts_with($record->path, 'http')) ? $record->path : null),
                                 Forms\Components\TextInput::make('path')
                                     ->label('Path Gambar / URL')
