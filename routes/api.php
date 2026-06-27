@@ -102,25 +102,7 @@ Route::get('dev-debug-logs-clear', function () {
     return response()->json(['message' => 'No logs to clear']);
 });
 
-Route::get('/dev-check-file', function (\Illuminate\Http\Request $request) {
-    $path = 'seasons/0QRjjqr3zYOPWOTlEUltvCbapJTT4vCP2V1Q30km.jpg';
-    $publicPath = public_path('storage/' . $path);
-    $storagePath = storage_path('app/public/' . $path);
-    
-    return response()->json([
-        'file' => $path,
-        'public_path_str' => $publicPath,
-        'public_path_exists' => file_exists($publicPath),
-        'storage_path_str' => $storagePath,
-        'storage_path_exists' => file_exists($storagePath),
-        'symlink_exists' => is_link(public_path('storage')),
-        'symlink_target' => is_link(public_path('storage')) ? readlink(public_path('storage')) : null,
-        'is_readable' => is_readable($storagePath),
-        'perms' => file_exists($storagePath) ? substr(sprintf('%o', fileperms($storagePath)), -4) : null,
-        'seasons_dir_exists' => is_dir(storage_path('app/public/seasons')),
-        'seasons_dir_files' => is_dir(storage_path('app/public/seasons')) ? scandir(storage_path('app/public/seasons')) : [],
-    ]);
-});
+
 
 Route::get('dev-diagnose', function () {
     $logPath = storage_path('logs/custom_debug.log');

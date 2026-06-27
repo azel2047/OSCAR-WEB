@@ -85,14 +85,6 @@ class SeasonResource extends Resource
                                     ->label('Upload Foto Utama Lokal')
                                     ->disk('public')
                                     ->directory('seasons')
-                                    ->saveUploadedFileUsing(function (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file, $record, callable $set) {
-                                        $path = $file->store('seasons', 'public');
-                                        if ($record) {
-                                            $record->update(['foto_utama' => $path]);
-                                        }
-                                        $set('foto_utama', $path);
-                                        return $path;
-                                    })
                                     ->formatStateUsing(fn ($record) => ($record && $record->foto_utama && !str_starts_with($record->foto_utama, 'http')) ? $record->foto_utama : null),
                                 Forms\Components\TextInput::make('foto_utama')
                                     ->label('Path Foto Utama / URL')
@@ -157,10 +149,16 @@ class SeasonResource extends Resource
                         Forms\Components\Repeater::make('galeri')
                             ->relationship('galeri')
                             ->mutateRelationshipDataBeforeCreateUsing(function (array $data): array {
+                                if (!empty($data['path_upload'])) {
+                                    $data['path'] = is_array($data['path_upload']) ? array_values($data['path_upload'])[0] : $data['path_upload'];
+                                }
                                 unset($data['path_upload']);
                                 return $data;
                             })
                             ->mutateRelationshipDataBeforeSaveUsing(function (array $data): array {
+                                if (!empty($data['path_upload'])) {
+                                    $data['path'] = is_array($data['path_upload']) ? array_values($data['path_upload'])[0] : $data['path_upload'];
+                                }
                                 unset($data['path_upload']);
                                 return $data;
                             })
@@ -169,14 +167,6 @@ class SeasonResource extends Resource
                                     ->label('Upload Gambar Lokal')
                                     ->disk('public')
                                     ->directory('galeri')
-                                    ->saveUploadedFileUsing(function (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file, $record, callable $set) {
-                                        $path = $file->store('galeri', 'public');
-                                        if ($record) {
-                                            $record->update(['path' => $path]);
-                                        }
-                                        $set('path', $path);
-                                        return $path;
-                                    })
                                     ->formatStateUsing(fn ($record) => ($record && $record->path && !str_starts_with($record->path, 'http')) ? $record->path : null),
                                 Forms\Components\TextInput::make('path')
                                     ->label('Path Gambar / URL')
