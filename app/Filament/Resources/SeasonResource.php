@@ -86,14 +86,19 @@ class SeasonResource extends Resource
                                     ->disk('public')
                                     ->directory('seasons')
                                     ->live()
+                                    ->saveUploadedFileUsing(function (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file, callable $set) {
+                                        $path = $file->store('seasons', 'public');
+                                        \Log::info('saveUploadedFileUsing FOTO UTAMA:', ['path' => $path]);
+                                        $set('foto_utama', $path);
+                                        return $path;
+                                    })
                                     ->afterStateUpdated(function ($state, callable $set) {
                                         if ($state) {
                                             $set('foto_utama', '(File baru akan diproses saat Save)');
                                         } else {
                                             $set('foto_utama', null);
                                         }
-                                    })
-                                    ->formatStateUsing(fn ($record) => ($record && $record->foto_utama && !str_starts_with($record->foto_utama, 'http')) ? $record->foto_utama : null),
+                                    }),
                                 Forms\Components\TextInput::make('foto_utama')
                                     ->label('Path Foto Utama / URL')
                                     ->helperText('Jika Anda mengupload foto utama lokal, path file akan otomatis disimpan pada kolom ini saat disimpan.')
@@ -170,14 +175,18 @@ class SeasonResource extends Resource
                                     ->disk('public')
                                     ->directory('galeri')
                                     ->live()
+                                    ->saveUploadedFileUsing(function (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file, callable $set) {
+                                        $path = $file->store('galeri', 'public');
+                                        $set('path', $path);
+                                        return $path;
+                                    })
                                     ->afterStateUpdated(function ($state, callable $set) {
                                         if ($state) {
                                             $set('path', '(File baru akan diproses saat Save)');
                                         } else {
                                             $set('path', null);
                                         }
-                                    })
-                                    ->formatStateUsing(fn ($record) => ($record && $record->path && !str_starts_with($record->path, 'http')) ? $record->path : null),
+                                    }),
                                 Forms\Components\TextInput::make('path')
                                     ->label('Path Gambar / URL')
                                     ->helperText('Jika Anda mengupload file lokal, path file akan otomatis disimpan pada kolom ini saat disimpan.')
