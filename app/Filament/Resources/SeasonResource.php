@@ -91,13 +91,6 @@ class SeasonResource extends Resource
                                         \Log::info('saveUploadedFileUsing FOTO UTAMA:', ['path' => $path]);
                                         $set('foto_utama', $path);
                                         return $path;
-                                    })
-                                    ->afterStateUpdated(function ($state, callable $set) {
-                                        if ($state) {
-                                            $set('foto_utama', '(File baru akan diproses saat Save)');
-                                        } else {
-                                            $set('foto_utama', null);
-                                        }
                                     }),
                                 Forms\Components\TextInput::make('foto_utama')
                                     ->label('Path Foto Utama / URL')
@@ -179,13 +172,6 @@ class SeasonResource extends Resource
                                         $path = $file->store('galeri', 'public');
                                         $set('path', $path);
                                         return $path;
-                                    })
-                                    ->afterStateUpdated(function ($state, callable $set) {
-                                        if ($state) {
-                                            $set('path', '(File baru akan diproses saat Save)');
-                                        } else {
-                                            $set('path', null);
-                                        }
                                     }),
                                 Forms\Components\TextInput::make('path')
                                     ->label('Path Gambar / URL')
