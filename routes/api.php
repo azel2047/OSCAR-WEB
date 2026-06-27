@@ -101,9 +101,13 @@ Route::get('dev-debug-logs-clear', function () {
     }
     return response()->json(['message' => 'No logs to clear']);
 });
-
-
-
+Route::get('dev-log', function () {
+    $path = storage_path('logs/laravel.log');
+    if (!file_exists($path)) return response()->json(['message' => 'No log file']);
+    $lines = file($path);
+    $last_lines = array_slice($lines, -500);
+    return response(implode("", $last_lines), 200, ['Content-Type' => 'text/plain']);
+});
 Route::get('dev-diagnose', function () {
     $logPath = storage_path('logs/custom_debug.log');
     $editSeasonPath = base_path('app/Filament/Resources/SeasonResource/Pages/EditSeason.php');
