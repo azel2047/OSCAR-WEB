@@ -81,23 +81,23 @@ class SeasonResource extends Resource
                         Grid::make(2)
                             ->schema([
                                 Group::make([
-                                    Forms\Components\FileUpload::make('foto_utama_upload')
-                                        ->label('Upload Foto Utama Lokal')
-                                        ->disk('public')
-                                        ->directory('seasons')
-                                        ->dehydrated(true)
-                                        ->formatStateUsing(fn ($record) => ($record && $record->foto_utama && !str_starts_with($record->foto_utama, 'http')) ? $record->foto_utama : null),
-                                    Forms\Components\TextInput::make('foto_utama')
-                                        ->label('Path Foto Utama / URL')
-                                        ->helperText('Jika Anda mengupload foto utama lokal, path file akan otomatis disimpan pada kolom ini saat disimpan.')
-                                        ->dehydrateStateUsing(function ($state, $get) {
-                                            $upload = $get('foto_utama_upload');
-                                            if ($upload) {
-                                                return is_array($upload) ? array_values($upload)[0] : $upload;
-                                            }
-                                            return $state;
-                                        })
-                                        ->maxLength(255),
+                                Forms\Components\FileUpload::make('foto_utama_upload')
+                                    ->label('Upload Foto Utama Lokal')
+                                    ->disk('public')
+                                    ->directory('seasons')
+                                    ->saveUploadedFileUsing(function (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file, $record, callable $set) {
+                                        $path = $file->store('seasons', 'public');
+                                        if ($record) {
+                                            $record->update(['foto_utama' => $path]);
+                                        }
+                                        $set('foto_utama', $path);
+                                        return $path;
+                                    })
+                                    ->formatStateUsing(fn ($record) => ($record && $record->foto_utama && !str_starts_with($record->foto_utama, 'http')) ? $record->foto_utama : null),
+                                Forms\Components\TextInput::make('foto_utama')
+                                    ->label('Path Foto Utama / URL')
+                                    ->helperText('Jika Anda mengupload foto utama lokal, path file akan otomatis disimpan pada kolom ini saat disimpan.')
+                                    ->maxLength(255),
                                 ]),
                                 Group::make([
                                     Grid::make(3)
@@ -169,28 +169,18 @@ class SeasonResource extends Resource
                                     ->label('Upload Gambar Lokal')
                                     ->disk('public')
                                     ->directory('galeri')
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set) {
-                                        if ($state) {
-                                            $file = is_array($state) ? array_values($state)[0] : $state;
-                                            if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                                                $set('path', $file->getClientOriginalName());
-                                            }
-                                        } else {
-                                            $set('path', null);
+                                    ->saveUploadedFileUsing(function (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file, $record, callable $set) {
+                                        $path = $file->store('galeri', 'public');
+                                        if ($record) {
+                                            $record->update(['path' => $path]);
                                         }
+                                        $set('path', $path);
+                                        return $path;
                                     })
                                     ->formatStateUsing(fn ($record) => ($record && $record->path && !str_starts_with($record->path, 'http')) ? $record->path : null),
                                 Forms\Components\TextInput::make('path')
                                     ->label('Path Gambar / URL')
                                     ->helperText('Jika Anda mengupload file lokal, path file akan otomatis disimpan pada kolom ini saat disimpan.')
-                                    ->dehydrateStateUsing(function ($state, $get) {
-                                        $upload = $get('path_upload');
-                                        if ($upload) {
-                                            return is_array($upload) ? array_values($upload)[0] : $upload;
-                                        }
-                                        return $state;
-                                    })
                                     ->required()
                                     ->maxLength(255),
                                 Forms\Components\TextInput::make('caption')
