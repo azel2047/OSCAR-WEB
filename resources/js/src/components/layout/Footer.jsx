@@ -37,7 +37,7 @@ export default function Footer() {
           </div>
 
           <p className="text-white/30 text-md font-mono mt-2">
-            © 2026 Olimpiade Sains dan Teknologi Terpadu. All Rights Reserved.
+            © 2026 OSCAR. All Rights Reserved.
           </p>
         </div>
 

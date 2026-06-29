@@ -660,7 +660,7 @@ export default function LandingPage() {
         
         <div className="flex flex-col gap-3 mb-12">
           <span className="font-mono text-[#70C492] text-[14px] tracking-widest font-extrabold uppercase">
-            DIES NATALIS 10 HIMA TI
+            DIES NATALIS 3 HIMA TI
           </span>
           <h2 className="font-cyber font-black uppercase text-white tracking-tight text-3xl sm:text-4xl leading-none">
             Akar dari <span className="text-[#70C492]">Keunggulan</span>
