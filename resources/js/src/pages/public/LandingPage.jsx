@@ -677,7 +677,7 @@ export default function LandingPage() {
                 apa itu oscar?
               </span>
               <p className="text-white/60 text-md leading-relaxed text-center font-body">
-                Dalam rangka memperingati Dies Natalis mdmpunan Mahasiswa Teknik Informatika (HIMA TI) ke-10 dengan bangga mempersembahkan gelaran perlombaan yang diberi nama OSCAR (Olimpiade Sains Dan Teknologi Terpadu). Gelaran yang memiliki tumbuh cahaya baru, menciptakan sebuah wadah untuk mengeksplorasi kemampuan dan semangat untuk berinovasi secara optimal.
+                Dalam rangka memperingati Dies Natalis Himpunan Mahasiswa Teknik Informatika (HIMA TI) ke-3 dengan bangga mempersembahkan gelaran perlombaan yang diberi nama OSCAR (Olimpiade Sains Dan Teknologi Terpadu). Gelaran yang memiliki tumbuh cahaya baru, menciptakan sebuah wadah untuk mengeksplorasi kemampuan dan semangat untuk berinovasi secara optimal.
               </p>
             </div>
 
