@@ -82,9 +82,9 @@ function LombaCard({ lomba }) {
       <div className="w-full z-10">
         <a 
           href={lomba.booklet_url || "/booklet-oscar3.pdf"} 
-          target="_blank"
-          rel="noopener noreferrer"
-          download 
+          target={lomba.booklet_url && !lomba.booklet_url.includes(window.location.hostname) ? '_blank' : undefined}
+          rel={lomba.booklet_url && !lomba.booklet_url.includes(window.location.hostname) ? 'noopener noreferrer' : undefined}
+          download={lomba.nama ? `Booklet_${lomba.nama.replace(/\s+/g, '_')}.pdf` : 'booklet.pdf'}
           onClick={(e) => e.stopPropagation()} 
           className="w-full"
         >

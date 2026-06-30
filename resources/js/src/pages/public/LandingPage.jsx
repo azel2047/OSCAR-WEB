@@ -435,20 +435,26 @@ export default function LandingPage() {
               }}
               onClick={() => {
                 if (bookletUrl) {
-                  if (bookletUrl.startsWith('http')) {
-                    window.open(bookletUrl, '_blank');
-                  } else {
+                  let isSameOrigin = false;
+                  try {
+                    const urlObj = new URL(bookletUrl, window.location.origin);
+                    isSameOrigin = urlObj.origin === window.location.origin;
+                  } catch (e) {}
+
+                  if (isSameOrigin) {
                     const link = document.createElement('a');
                     link.href = bookletUrl;
-                    link.setAttribute('download', '');
+                    link.setAttribute('download', 'Booklet_OSCAR_3.0.pdf');
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
+                  } else {
+                    window.open(bookletUrl, '_blank');
                   }
                 } else {
                   const link = document.createElement('a');
                   link.href = '/booklet-oscar3.pdf';
-                  link.setAttribute('download', 'booklet-oscar3.pdf');
+                  link.setAttribute('download', 'Booklet_OSCAR_3.0.pdf');
                   document.body.appendChild(link);
                   link.click();
                   document.body.removeChild(link);
