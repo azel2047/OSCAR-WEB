@@ -41,6 +41,7 @@ class RolePermissions extends Page implements HasForms
  
     public array $modules = [
         'lomba' => 'Manajemen Lomba',
+        'syarat_berkas' => 'Persyaratan Berkas',
         'pendaftaran' => 'Verifikasi Pendaftaran',
         'mitra' => 'Manajemen Mitra/Sponsor',
         'timeline' => 'Manajemen Timeline',

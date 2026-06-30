@@ -96,6 +96,7 @@ class User extends Authenticatable implements FilamentUser, HasName
                 $default = [
                     'po' => [
                         'lomba' => ['view', 'create', 'update'],
+                        'syarat_berkas' => ['view', 'create', 'update', 'delete'],
                         'pendaftaran' => ['view', 'update'],
                         'mitra' => ['view', 'create', 'update'],
                         'timeline' => ['view', 'create', 'update'],
@@ -105,6 +106,7 @@ class User extends Authenticatable implements FilamentUser, HasName
                     ],
                     'sc' => [
                         'lomba' => ['view', 'create', 'update'],
+                        'syarat_berkas' => ['view', 'create', 'update', 'delete'],
                         'pendaftaran' => ['view', 'update'],
                         'mitra' => ['view', 'create', 'update'],
                         'timeline' => ['view', 'create', 'update'],
@@ -114,6 +116,7 @@ class User extends Authenticatable implements FilamentUser, HasName
                     ],
                     'event' => [
                         'lomba' => ['view', 'create', 'update'],
+                        'syarat_berkas' => ['view', 'create', 'update', 'delete'],
                         'pendaftaran' => ['view'],
                         'timeline' => ['view', 'create', 'update']
                     ],
