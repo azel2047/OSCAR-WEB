@@ -43,12 +43,39 @@ class ConfigResource extends Resource
                             ->label('Keterangan / Fungsi')
                             ->disabled()
                             ->maxLength(255),
+                        Forms\Components\FileUpload::make('booklet_upload')
+                            ->label('Unggah Booklet (PDF/Lokal)')
+                            ->disk('public')
+                            ->directory('booklets')
+                            ->dehydrated(false)
+                            ->visible(fn ($record) => $record?->key === 'booklet_url')
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if ($state) {
+                                    $file = is_array($state) ? array_values($state)[0] : $state;
+                                    if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                                        $set('value', $file->getClientOriginalName());
+                                    }
+                                } else {
+                                    $set('value', null);
+                                }
+                            })
+                            ->formatStateUsing(fn ($record) => ($record && $record->key === 'booklet_url' && $record->value && !str_starts_with($record->value, 'http')) ? $record->value : null),
                         Forms\Components\Textarea::make('value')
-                            ->label('Nilai Konfigurasi (Value)')
-                            ->required()
+                            ->label(fn ($record) => $record?->key === 'booklet_url' ? 'Atau Tautan (URL) Booklet' : 'Nilai Konfigurasi (Value)')
+                            ->required(fn ($record) => $record?->key !== 'booklet_url')
                             ->rows(3)
                             ->columnSpanFull()
-                            ->maxLength(1000),
+                            ->maxLength(1000)
+                            ->dehydrateStateUsing(function ($state, $get, $record) {
+                                if ($record?->key === 'booklet_url') {
+                                    $upload = $get('booklet_upload');
+                                    if ($upload) {
+                                        return is_array($upload) ? array_values($upload)[0] : $upload;
+                                    }
+                                }
+                                return $state;
+                            }),
                     ])->columns(2)
             ]);
     }

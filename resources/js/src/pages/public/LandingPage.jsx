@@ -455,7 +455,7 @@ export default function LandingPage() {
                 }
               }}
             >
-              Download Buku Panduan <Download size={15} />
+              Download Booklet <Download size={15} />
             </motion.button>
           </div>
 
