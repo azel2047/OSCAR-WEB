@@ -83,6 +83,7 @@ class ConfigResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => auth()->user()?->role === 'admin' ? $query : $query->where('key', 'booklet_url'))
             ->columns([
                 Tables\Columns\TextColumn::make('key')
                     ->label('Kunci (Key)')
