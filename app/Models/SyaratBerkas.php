@@ -25,6 +25,11 @@ class SyaratBerkas extends Model
         'is_required' => 'boolean',
     ];
 
+    public function setIsRequiredAttribute($value)
+    {
+        $this->attributes['is_required'] = $value ? 'true' : 'false';
+    }
+
     protected $appends = [
         'file_template_url',
     ];
