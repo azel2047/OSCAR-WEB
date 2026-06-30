@@ -1,12 +1,14 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import useLombaStore from '@/stores/lombaStore';
 import { gsap } from '@/animations/gsapConfig';
 import { 
   Code, PenTool, BarChart3, Shield, Sparkles,
   UserPlus, Calendar, UploadCloud, CheckCircle, Tv, Trophy,
-  Layout
+  Layout, Clock, ClipboardCheck, Megaphone
 } from 'lucide-react';
+import { useApi } from '@/hooks/useApi';
+import api from '@/api/axios';
 
 const CABANG_ICONS = {
   'web-development': Code,
@@ -16,14 +18,34 @@ const CABANG_ICONS = {
   'desain-ui-ux': Layout,
 };
 
-const TIMELINE_EVENTS = [
-  { left: '15 JUN - 5 AGUSTUS 2026', right: 'Pendaftaran', icon: UserPlus },
-  { left: '8 AGUSTUS 2026', right: 'Pembukaan dan TM', icon: Calendar },
-  { left: '1 SEPTEMBER 2026', right: 'Pengumpulan Karya', icon: UploadCloud },
-  { left: '5 SEPTEMBER 2026', right: 'Pengumuman Top 10', icon: CheckCircle },
-  { left: '6 SEPTEMBER 2026', right: 'Penilaian dan Presentasi', icon: Tv },
-  { left: '9 SEPTEMBER 2026', right: 'Acara Puncak', icon: Trophy },
-];
+const getTimelineIcon = (stageName) => {
+  const name = stageName.toLowerCase();
+  if (name.includes('buka') || (name.includes('daftar') && !name.includes('batas') && !name.includes('tutup'))) {
+    return UserPlus;
+  }
+  if (name.includes('batas') || name.includes('tutup') || name.includes('deadline') || name.includes('akhir')) {
+    return Clock;
+  }
+  if (name.includes('karya') || name.includes('kumpul') || name.includes('unggah') || name.includes('upload')) {
+    return UploadCloud;
+  }
+  if (name.includes('verifikasi') || name.includes('berkas') || name.includes('seleksi') || name.includes('kurasi')) {
+    return ClipboardCheck;
+  }
+  if (name.includes('pengumuman') && (name.includes('peserta') || name.includes('top'))) {
+    return Megaphone;
+  }
+  if (name.includes('10') || name.includes('top')) {
+    return CheckCircle;
+  }
+  if (name.includes('presentasi') || name.includes('wawancara') || name.includes('tv') || name.includes('nilai')) {
+    return Tv;
+  }
+  if (name.includes('pemenang') || name.includes('juara') || name.includes('puncak') || name.includes('awarding') || name.includes('ceremony')) {
+    return Trophy;
+  }
+  return Calendar;
+};
 
 function LombaCard({ lomba }) {
   const Icon = CABANG_ICONS[lomba.slug] || Sparkles;
@@ -77,9 +99,49 @@ export default function LombaPage() {
   const { lombaList, isLoading, fetchLomba } = useLombaStore();
   const pageRef = useRef(null);
 
+  // Dynamic Timeline
+  const { data: rawTimelineData, request: fetchTimeline } = useApi();
+
   useEffect(() => {
     fetchLomba();
+    fetchTimeline(() => api.get('/timeline'));
   }, []);
+
+  const timelineEvents = useMemo(() => {
+    if (!rawTimelineData) return [];
+    
+    let list = [];
+    if (Array.isArray(rawTimelineData)) list = rawTimelineData;
+    else if (Array.isArray(rawTimelineData.data)) list = rawTimelineData.data;
+    else if (rawTimelineData.data && Array.isArray(rawTimelineData.data.data)) list = rawTimelineData.data.data;
+    
+    if (list.length === 0) return [];
+
+    return list.map(item => {
+      const dateStr = item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      }) : '';
+      
+      const dateWithTime = item.waktu ? `${dateStr} (${item.waktu})` : dateStr;
+
+      return {
+        left: dateWithTime,
+        right: item.nama,
+        icon: getTimelineIcon(item.nama)
+      };
+    });
+  }, [rawTimelineData]);
+
+  const activeTimeline = timelineEvents.length > 0 ? timelineEvents : [
+    { left: '15 JUN - 5 AGUSTUS 2026', right: 'Pendaftaran', icon: UserPlus },
+    { left: '8 AGUSTUS 2026', right: 'Pembukaan dan TM', icon: Calendar },
+    { left: '1 SEPTEMBER 2026', right: 'Pengumpulan Karya', icon: UploadCloud },
+    { left: '5 SEPTEMBER 2026', right: 'Pengumuman Top 10', icon: CheckCircle },
+    { left: '6 SEPTEMBER 2026', right: 'Penilaian dan Presentasi', icon: Tv },
+    { left: '9 SEPTEMBER 2026', right: 'Acara Puncak', icon: Trophy },
+  ];
 
   useEffect(() => {
     const el = pageRef.current;
@@ -216,7 +278,7 @@ export default function LombaPage() {
           />
 
           <div className="space-y-12">
-            {TIMELINE_EVENTS.map((t, i) => {
+            {activeTimeline.map((t, i) => {
               const EventIcon = t.icon;
               return (
                 <div
