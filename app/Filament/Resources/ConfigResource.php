@@ -68,13 +68,7 @@ class ConfigResource extends Resource
                             ->rows(3)
                             ->columnSpanFull()
                             ->maxLength(1000)
-                            ->dehydrateStateUsing(function ($state, $get) {
-                                $upload = $get('booklet_upload');
-                                if ($upload) {
-                                    return is_array($upload) ? array_values($upload)[0] : $upload;
-                                }
-                                return $state;
-                            }),
+                            ->dehydrated(fn ($get) => empty($get('booklet_upload'))),
                     ])->columns(2)
             ]);
     }

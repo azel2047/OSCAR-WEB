@@ -17,6 +17,7 @@ class Config extends Model
         'key',
         'value',
         'keterangan',
+        'booklet_upload',
     ];
 
     public static function get(string $key, mixed $default = null): mixed
@@ -37,7 +38,9 @@ class Config extends Model
 
     public function setBookletUploadAttribute($value)
     {
-        // Ignore during Eloquent save to avoid "Unknown column" SQL error
+        if ($value) {
+            $this->attributes['value'] = is_array($value) ? array_values($value)[0] : $value;
+        }
     }
 }
 

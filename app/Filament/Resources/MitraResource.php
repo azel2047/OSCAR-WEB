@@ -59,13 +59,7 @@ class MitraResource extends Resource
                                 Forms\Components\TextInput::make('logo_path')
                                     ->label('Logo URL / Path')
                                     ->helperText('Jika Anda mengupload file lokal di sebelah kiri, path file akan otomatis disimpan pada kolom ini saat disimpan.')
-                                    ->dehydrateStateUsing(function ($state, $get) {
-                                        $upload = $get('logo_upload');
-                                        if ($upload) {
-                                            return is_array($upload) ? array_values($upload)[0] : $upload;
-                                        }
-                                        return $state;
-                                    })
+                                    ->dehydrated(fn ($get) => empty($get('logo_upload')))
                                     ->required()
                                     ->maxLength(255),
                             ])->columnSpanFull(),

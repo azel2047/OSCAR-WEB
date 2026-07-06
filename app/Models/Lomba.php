@@ -28,7 +28,9 @@ class Lomba extends Model
         'booklet_path',
         'banner_path',
         'surat_izin_path',
-        'tema_list'
+        'tema_list',
+        'booklet_upload',
+        'banner_upload',
     ];
 
     protected $casts = [
@@ -144,12 +146,16 @@ class Lomba extends Model
 
     public function setBookletUploadAttribute($value)
     {
-        // Ignore during Eloquent save to avoid "Unknown column" SQL error
+        if ($value) {
+            $this->attributes['booklet_path'] = is_array($value) ? array_values($value)[0] : $value;
+        }
     }
 
     public function setBannerUploadAttribute($value)
     {
-        // Ignore during Eloquent save to avoid "Unknown column" SQL error
+        if ($value) {
+            $this->attributes['banner_path'] = is_array($value) ? array_values($value)[0] : $value;
+        }
     }
 }
 

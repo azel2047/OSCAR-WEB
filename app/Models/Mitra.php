@@ -14,6 +14,7 @@ class Mitra extends Model
         'logo_path',
         'website_url',
         'urutan',
+        'logo_upload',
     ];
 
     protected $appends = ['logo_url'];
@@ -47,7 +48,9 @@ class Mitra extends Model
 
     public function setLogoUploadAttribute($value)
     {
-        // Ignore during Eloquent save to avoid "Unknown column" SQL error
+        if ($value) {
+            $this->attributes['logo_path'] = is_array($value) ? array_values($value)[0] : $value;
+        }
     }
 }
 
