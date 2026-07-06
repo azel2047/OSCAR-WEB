@@ -44,7 +44,6 @@ class MitraResource extends Resource
                                     ->label('Pilih File Logo Lokal (Upload)')
                                     ->disk('public')
                                     ->directory('mitras')
-                                    ->dehydrated(false)
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set) {
                                         if ($state) {

@@ -141,4 +141,15 @@ class Lomba extends Model
             }
         });
     }
+
+    public function setBookletUploadAttribute($value)
+    {
+        // Ignore during Eloquent save to avoid "Unknown column" SQL error
+    }
+
+    public function setBannerUploadAttribute($value)
+    {
+        // Ignore during Eloquent save to avoid "Unknown column" SQL error
+    }
 }
+

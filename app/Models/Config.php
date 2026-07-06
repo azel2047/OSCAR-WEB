@@ -34,4 +34,10 @@ class Config extends Model
             ]
         );
     }
+
+    public function setBookletUploadAttribute($value)
+    {
+        // Ignore during Eloquent save to avoid "Unknown column" SQL error
+    }
 }
+

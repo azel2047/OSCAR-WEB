@@ -47,7 +47,6 @@ class ConfigResource extends Resource
                             ->label('Unggah Booklet (PDF/Lokal)')
                             ->disk('public')
                             ->directory('booklets')
-                            ->dehydrated(false)
                             ->visible(fn ($record) => $record?->key === 'booklet_url')
                             ->reactive()
                             ->afterStateUpdated(function ($state, callable $set) {

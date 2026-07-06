@@ -134,7 +134,6 @@ class LombaResource extends Resource
                                             ->label('Unggah Booklet Lokal')
                                             ->disk('public')
                                             ->directory('booklets')
-                                            ->dehydrated(false)
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set) {
                                                 if ($state) {
@@ -164,7 +163,6 @@ class LombaResource extends Resource
                                             ->label('Unggah Gambar Banner')
                                             ->disk('public')
                                             ->directory('banners')
-                                            ->dehydrated(false)
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set) {
                                                 if ($state) {
