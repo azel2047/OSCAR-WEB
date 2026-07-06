@@ -55,6 +55,8 @@ class ConfigResource extends Resource
                                     $file = is_array($state) ? array_values($state)[0] : $state;
                                     if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
                                         $set('value', $file->getClientOriginalName());
+                                    } elseif (is_string($file)) {
+                                        $set('value', basename($file));
                                     }
                                 } else {
                                     $set('value', null);
@@ -67,12 +69,10 @@ class ConfigResource extends Resource
                             ->rows(3)
                             ->columnSpanFull()
                             ->maxLength(1000)
-                            ->dehydrateStateUsing(function ($state, $get, $record) {
-                                if ($record?->key === 'booklet_url') {
-                                    $upload = $get('booklet_upload');
-                                    if ($upload) {
-                                        return is_array($upload) ? array_values($upload)[0] : $upload;
-                                    }
+                            ->dehydrateStateUsing(function ($state, $get) {
+                                $upload = $get('booklet_upload');
+                                if ($upload) {
+                                    return is_array($upload) ? array_values($upload)[0] : $upload;
                                 }
                                 return $state;
                             }),
@@ -83,7 +83,6 @@ class ConfigResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => auth()->user()?->role === 'admin' ? $query : $query->where('key', 'booklet_url'))
             ->columns([
                 Tables\Columns\TextColumn::make('key')
                     ->label('Kunci (Key)')

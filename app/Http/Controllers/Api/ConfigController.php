@@ -38,7 +38,14 @@ class ConfigController extends Controller
                 } else if (file_exists(public_path($value))) {
                     $value = asset($value);
                 } else {
-                    $value = asset('storage/' . $value);
+                    $supabaseUrl = env('SUPABASE_URL');
+                    if (!empty($supabaseUrl)) {
+                        $supabaseUrl = rtrim($supabaseUrl, '/');
+                        $bucket = env('SUPABASE_BUCKET_GALERI', 'galeri-season');
+                        $value = "{$supabaseUrl}/storage/v1/object/public/{$bucket}/{$value}";
+                    } else {
+                        $value = asset('storage/' . $value);
+                    }
                 }
             }
         }
