@@ -28,9 +28,31 @@ class ConfigController extends Controller
         }
 
         $config = ConfigModel::find($key);
+        $value = $config?->value ?? null;
+
+        if ($key === 'booklet_url' && !empty($value)) {
+            if (!str_starts_with($value, 'http://') && !str_starts_with($value, 'https://')) {
+                // If it is stored as 'booklets/filename.pdf' or similar, check public storage path
+                if (file_exists(public_path('storage/' . $value))) {
+                    $value = asset('storage/' . $value);
+                } else if (file_exists(public_path($value))) {
+                    $value = asset($value);
+                } else {
+                    $supabaseUrl = env('SUPABASE_URL');
+                    if (!empty($supabaseUrl)) {
+                        $supabaseUrl = rtrim($supabaseUrl, '/');
+                        $bucket = env('SUPABASE_BUCKET_GALERI', 'galeri-season');
+                        $value = "{$supabaseUrl}/storage/v1/object/public/{$bucket}/{$value}";
+                    } else {
+                        $value = asset('storage/' . $value);
+                    }
+                }
+            }
+        }
+
         return $this->success([
             'key'   => $key,
-            'value' => $config?->value ?? null,
+            'value' => $value,
         ]);
     }
 }
