@@ -38,6 +38,7 @@ class Config extends Model
 
     public function setBookletUploadAttribute($value)
     {
+        \Illuminate\Support\Facades\Log::info('setBookletUploadAttribute called', ['value' => $value]);
         if ($value) {
             $this->attributes['value'] = is_array($value) ? array_values($value)[0] : $value;
         }
