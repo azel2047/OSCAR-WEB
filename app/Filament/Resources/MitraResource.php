@@ -44,7 +44,7 @@ class MitraResource extends Resource
                                     ->label('Pilih File Logo Lokal (Upload)')
                                     ->disk('public')
                                     ->directory('mitras')
-                                    ->reactive()
+                                    ->live()
                                     ->afterStateUpdated(function ($state, callable $set) {
                                         if ($state) {
                                             $file = is_array($state) ? array_values($state)[0] : $state;
@@ -105,14 +105,15 @@ class MitraResource extends Resource
             ])
             ->actions([
                 Actions\EditAction::make()
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->using(function (array $data, \Illuminate\Database\Eloquent\Model $record): \Illuminate\Database\Eloquent\Model {
                         if (isset($data['logo_upload']) && !empty($data['logo_upload'])) {
                             $data['logo_path'] = is_array($data['logo_upload']) 
                                 ? array_values($data['logo_upload'])[0] 
                                 : $data['logo_upload'];
                         }
                         unset($data['logo_upload']);
-                        return $data;
+                        $record->update($data);
+                        return $record;
                     }),
                 Actions\DeleteAction::make(),
             ])

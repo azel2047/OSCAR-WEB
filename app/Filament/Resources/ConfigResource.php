@@ -48,7 +48,7 @@ class ConfigResource extends Resource
                             ->disk('public')
                             ->directory('booklets')
                             ->visible(fn ($record) => $record?->key === 'booklet_url')
-                            ->reactive()
+                            ->live()
                             ->afterStateUpdated(function ($state, callable $set) {
                                 if ($state) {
                                     $file = is_array($state) ? array_values($state)[0] : $state;
@@ -99,14 +99,15 @@ class ConfigResource extends Resource
             ])
             ->actions([
                 Actions\EditAction::make()
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->using(function (array $data, \Illuminate\Database\Eloquent\Model $record): \Illuminate\Database\Eloquent\Model {
                         if (isset($data['booklet_upload']) && !empty($data['booklet_upload'])) {
                             $data['value'] = is_array($data['booklet_upload']) 
                                 ? array_values($data['booklet_upload'])[0] 
                                 : $data['booklet_upload'];
                         }
                         unset($data['booklet_upload']);
-                        return $data;
+                        $record->update($data);
+                        return $record;
                     }),
             ])
             ->bulkActions([

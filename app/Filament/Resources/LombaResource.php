@@ -131,10 +131,10 @@ class LombaResource extends Resource
                                 Grid::make(2)
                                     ->schema([
                                         Forms\Components\FileUpload::make('booklet_upload')
-                                            ->label('Unggah Booklet Lokal')
+                                            ->label('Unggah Berkas Booklet (PDF)')
                                             ->disk('public')
                                             ->directory('booklets')
-                                            ->reactive()
+                                            ->live()
                                             ->afterStateUpdated(function ($state, callable $set) {
                                                 if ($state) {
                                                     $file = is_array($state) ? array_values($state)[0] : $state;
@@ -156,7 +156,7 @@ class LombaResource extends Resource
                                             ->label('Unggah Gambar Banner')
                                             ->disk('public')
                                             ->directory('banners')
-                                            ->reactive()
+                                            ->live()
                                             ->afterStateUpdated(function ($state, callable $set) {
                                                 if ($state) {
                                                     $file = is_array($state) ? array_values($state)[0] : $state;
