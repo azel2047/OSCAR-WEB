@@ -24,6 +24,7 @@ Route::get('health', function () {
         'status'  => 'ok',
         'app'     => config('app.name'),
         'env'     => config('app.env'),
+        'log'     => config('logging.default'),
         'time'    => now()->toISOString(),
         'build'   => 'v_upload_fix_4',
     ], 200);
