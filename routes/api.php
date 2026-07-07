@@ -31,10 +31,15 @@ Route::get('health', function () {
 });
 
 Route::get('dev-logs', function () {
-    $path = storage_path('logs/laravel.log');
-    if (!file_exists($path)) {
+    $dir = storage_path('logs');
+    $files = glob($dir . '/*.log');
+    if (empty($files)) {
         return response()->json(['message' => 'No log file found'], 404);
     }
+    usort($files, function ($a, $b) {
+        return filemtime($b) - filemtime($a);
+    });
+    $path = $files[0];
     $lines = file($path);
     $last_lines = array_slice($lines, -150);
     return response($last_lines, 200, ['Content-Type' => 'text/plain']);
