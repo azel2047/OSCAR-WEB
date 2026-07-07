@@ -434,32 +434,38 @@ export default function LandingPage() {
                 transition: { type: "spring", damping: 30, stiffness: 400 },
               }}
               onClick={() => {
-                if (bookletUrl) {
-                  let isSameOrigin = false;
-                  try {
-                    const urlObj = new URL(bookletUrl, window.location.origin);
-                    isSameOrigin = urlObj.origin === window.location.origin;
-                  } catch (e) {}
+  if (bookletUrl) {
+    let isSameOrigin = false;
+    // Tambahkan timestamp agar browser selalu mengambil file paling baru dari server
+    const separator = bookletUrl.includes('?') ? '&' : '?';
+    const freshBookletUrl = `${bookletUrl}${separator}t=${new Date().getTime()}`;
 
-                  if (isSameOrigin) {
-                    const link = document.createElement('a');
-                    link.href = bookletUrl;
-                    link.setAttribute('download', 'Booklet_OSCAR_3.0.pdf');
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  } else {
-                    window.open(bookletUrl, '_blank');
-                  }
-                } else {
-                  const link = document.createElement('a');
-                  link.href = '/booklet-oscar3.pdf';
-                  link.setAttribute('download', 'Booklet_OSCAR_3.0.pdf');
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }
-              }}
+    try {
+      const urlObj = new URL(freshBookletUrl, window.location.origin);
+      isSameOrigin = urlObj.origin === window.location.origin;
+    } catch (e) {}
+
+    if (isSameOrigin) {
+      const link = document.createElement('a');
+      link.href = freshBookletUrl;
+      link.setAttribute('download', 'Booklet_OSCAR_3.0.pdf');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      window.open(freshBookletUrl, '_blank');
+    }
+  } else {
+    // Jika masuk ke sini, artinya state bookletUrl dari database/API belum masuk ke komponen ini
+    console.warn("Peringatan: bookletUrl kosong, mengunduh file aset bawaan.");
+    const link = document.createElement('a');
+    link.href = `/booklet-oscar3.pdf?t=${new Date().getTime()}`;
+    link.setAttribute('download', 'Booklet_OSCAR_3.0.pdf');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}}
             >
               Download Booklet <Download size={15} />
             </motion.button>
