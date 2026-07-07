@@ -67,8 +67,7 @@ class ConfigResource extends Resource
                             ->required(fn ($record) => $record?->key !== 'booklet_url')
                             ->rows(3)
                             ->columnSpanFull()
-                            ->maxLength(1000)
-                            ->dehydrated(fn ($get) => empty($get('booklet_upload'))),
+                            ->maxLength(1000),
                     ])->columns(2)
             ]);
     }
@@ -99,7 +98,16 @@ class ConfigResource extends Resource
                 //
             ])
             ->actions([
-                Actions\EditAction::make(),
+                Actions\EditAction::make()
+                    ->mutateFormDataUsing(function (array $data): array {
+                        if (isset($data['booklet_upload']) && !empty($data['booklet_upload'])) {
+                            $data['value'] = is_array($data['booklet_upload']) 
+                                ? array_values($data['booklet_upload'])[0] 
+                                : $data['booklet_upload'];
+                        }
+                        unset($data['booklet_upload']);
+                        return $data;
+                    }),
             ])
             ->bulkActions([
                 // No bulk actions for system configs

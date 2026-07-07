@@ -14,7 +14,6 @@ class Mitra extends Model
         'logo_path',
         'website_url',
         'urutan',
-        'logo_upload',
     ];
 
     protected $appends = ['logo_url'];
@@ -44,13 +43,6 @@ class Mitra extends Model
         $supabaseUrl = rtrim(env('SUPABASE_URL'), '/');
         $bucket = env('SUPABASE_BUCKET_GALERI', 'galeri-season');
         return "{$supabaseUrl}/storage/v1/object/public/{$bucket}/{$this->logo_path}";
-    }
-
-    public function setLogoUploadAttribute($value)
-    {
-        if ($value) {
-            $this->attributes['logo_path'] = is_array($value) ? array_values($value)[0] : $value;
-        }
     }
 }
 

@@ -148,7 +148,6 @@ class LombaResource extends Resource
                                             ->formatStateUsing(fn ($record) => ($record && $record->booklet_path && !str_starts_with($record->booklet_path, 'http')) ? $record->booklet_path : null),
                                         Forms\Components\TextInput::make('booklet_path')
                                             ->label('Atau Tautan (URL) Booklet')
-                                            ->dehydrated(fn ($get) => empty($get('booklet_upload')))
                                             ->maxLength(255),
                                     ]),
                                 Grid::make(2)
@@ -171,7 +170,6 @@ class LombaResource extends Resource
                                             ->formatStateUsing(fn ($record) => ($record && $record->banner_path && !str_starts_with($record->banner_path, 'http')) ? $record->banner_path : null),
                                         Forms\Components\TextInput::make('banner_path')
                                             ->label('Atau Tautan (URL) Banner')
-                                            ->dehydrated(fn ($get) => empty($get('banner_upload')))
                                             ->maxLength(255),
                                     ]),
 

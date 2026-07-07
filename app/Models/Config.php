@@ -17,7 +17,6 @@ class Config extends Model
         'key',
         'value',
         'keterangan',
-        'booklet_upload',
     ];
 
     public static function get(string $key, mixed $default = null): mixed
@@ -34,14 +33,6 @@ class Config extends Model
                 'updated_at' => now(),
             ]
         );
-    }
-
-    public function setBookletUploadAttribute($value)
-    {
-        \Illuminate\Support\Facades\Log::info('setBookletUploadAttribute called', ['value' => $value]);
-        if ($value) {
-            $this->attributes['value'] = is_array($value) ? array_values($value)[0] : $value;
-        }
     }
 }
 

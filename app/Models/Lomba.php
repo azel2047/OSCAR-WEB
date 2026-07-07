@@ -28,9 +28,7 @@ class Lomba extends Model
         'booklet_path',
         'banner_path',
         'surat_izin_path',
-        'tema_list',
-        'booklet_upload',
-        'banner_upload',
+        'tema_list'
     ];
 
     protected $casts = [
@@ -142,20 +140,6 @@ class Lomba extends Model
                 $model->slug = Str::slug($model->nama);
             }
         });
-    }
-
-    public function setBookletUploadAttribute($value)
-    {
-        if ($value) {
-            $this->attributes['booklet_path'] = is_array($value) ? array_values($value)[0] : $value;
-        }
-    }
-
-    public function setBannerUploadAttribute($value)
-    {
-        if ($value) {
-            $this->attributes['banner_path'] = is_array($value) ? array_values($value)[0] : $value;
-        }
     }
 }
 
