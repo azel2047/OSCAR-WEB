@@ -10,7 +10,8 @@ import {
   CheckCircle, ChevronRight, ChevronLeft, Upload, Info, 
   Clock, AlertCircle, Shield, Check, ExternalLink, 
   MessageSquare, ArrowLeft, Trophy, Sparkles, Laptop, Paintbrush, Terminal,
-  Edit3, Users, Award, Github, FileText, Phone, Mail
+  Edit3, Users, Award, Github, FileText, Phone, Mail,
+  Download, BookOpen
 } from 'lucide-react';
 import gsap from '@/animations/gsapConfig';
 
@@ -71,6 +72,7 @@ export default function PesertaDashboardPage() {
     bukti_transfer: null
   });
   const [syaratList, setSyaratList] = useState([]);
+  const [bookletUrl, setBookletUrl] = useState('');
 
   // Project Submission Inline States
   const [pengumpulan, setPengumpulan] = useState(null);
@@ -109,6 +111,15 @@ export default function PesertaDashboardPage() {
       }
     };
     fetchSyarat();
+
+    // Fetch booklet URL
+    api.get('/config/booklet_url')
+      .then(res => {
+        if (res.data?.success && res.data?.data?.value) {
+          setBookletUrl(res.data.data.value);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Prefill toggle states when data is loaded
@@ -1430,6 +1441,49 @@ export default function PesertaDashboardPage() {
         <p className="text-[#9dd5b8] text-xs sm:text-sm mt-1.5">
           {selectedLomba ? `Lengkapi formulir pendaftaran khusus ${selectedLomba.nama}` : 'Isi identitas diri, tim, dan unggah berkas Anda.'}
         </p>
+      </div>
+
+      {/* Booklet Download Banner */}
+      <div className="relative overflow-hidden rounded-2xl border border-[#00ffc8]/20 bg-gradient-to-r from-[#00ffc8]/[0.06] via-[#0a2a1a]/60 to-[#00ffc8]/[0.04] p-4 sm:p-5 backdrop-blur-sm">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgwLDI1NSwxNTAsMC4wMykiLz48L3N2Zz4=')] opacity-50" />
+        <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#00ffc8]/10 border border-[#00ffc8]/30 flex items-center justify-center shadow-[0_0_12px_rgba(0,255,200,0.15)]">
+              <BookOpen size={18} className="text-[#00ffc8]" />
+            </div>
+            <div>
+              <p className="text-white font-display font-bold text-sm">Buku Panduan OSCAR 3.0</p>
+              <p className="text-[#8B9A7A] text-xs mt-0.5">Unduh buku panduan untuk informasi lengkap seputar lomba</p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              if (bookletUrl) {
+                if (bookletUrl.startsWith('http')) {
+                  window.open(bookletUrl, '_blank');
+                } else {
+                  const link = document.createElement('a');
+                  link.href = bookletUrl;
+                  link.setAttribute('download', '');
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }
+              } else {
+                const link = document.createElement('a');
+                link.href = '/Booklet_OSCAR_3.0.pdf';
+                link.setAttribute('download', 'Booklet_OSCAR_3.0.pdf');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }
+            }}
+            className="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#00ffc8]/10 border border-[#00ffc8]/30 text-[#00ffc8] hover:bg-[#00ffc8]/20 hover:border-[#00ffc8]/50 hover:shadow-[0_0_20px_rgba(0,255,200,0.2)] font-mono font-bold text-xs tracking-wider transition-all duration-300 cursor-pointer"
+          >
+            <Download size={14} />
+            Download Booklet
+          </button>
+        </div>
       </div>
 
       {/* Step Indicator Bar */}

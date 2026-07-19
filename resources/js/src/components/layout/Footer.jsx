@@ -55,8 +55,8 @@ export default function Footer() {
             </p>
           </div>
           <div className="flex flex-col gap-1 text-base font-mono text-white/40">
-            <span>Email: info@nurulfikri.ac.id</span>
-            <span>Telp: 021-786.3191 / 787.4223</span>
+            <span>Email: kompetisioscar@gmail.com</span>
+            <span>Telp: +62 878-2212-5426</span>
           </div>
         </div>
 

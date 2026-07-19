@@ -8,6 +8,14 @@ const InteractiveSelector = ({ lombas = [] }) => {
   const [animatedOptions, setAnimatedOptions] = useState([]);
   const { token } = useAuthStore();
   const isLoggedIn = !!token;
+
+  // Strip HTML tags from rich text editor content
+  const stripHtml = (html) => {
+    if (!html) return '';
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
   
   const options = useMemo(() => {
     const defaultOptions = [
@@ -16,7 +24,7 @@ const InteractiveSelector = ({ lombas = [] }) => {
         title: "Web Development",
         category: "Siswa SMA/SMK",
         description: "Rancang & bangun aplikasi web inovatif bertema lingkungan.",
-        image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=800&auto=format&fit=crop",
         icon: <Code size={20} className="text-[#70C492]" />,
         link: "/lomba/web-development"
       },
@@ -25,7 +33,7 @@ const InteractiveSelector = ({ lombas = [] }) => {
         title: "Infografis",
         category: "Siswa SMA/SMK",
         description: "Visualisasikan data sains dan lingkungan lewat desain informatif.",
-        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1543286386-713bdd548da4?q=80&w=800&auto=format&fit=crop",
         icon: <BarChart3 size={20} className="text-[#70C492]" />,
         link: "/lomba/desain-infografis"
       },
@@ -34,7 +42,7 @@ const InteractiveSelector = ({ lombas = [] }) => {
         title: "Poster Digital",
         category: "Siswa SMA/SMK",
         description: "Ekspresikan kampanye hijau melestarikan bumi lewat seni poster digital.",
-        image: "https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=800&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=800&auto=format&fit=crop",
         icon: <PenTool size={20} className="text-[#70C492]" />,
         link: "/lomba/desain-poster"
       },
@@ -43,7 +51,7 @@ const InteractiveSelector = ({ lombas = [] }) => {
         title: "Capture The Flag (CTF)",
         category: "Siswa SMA/SMK",
         description: "Pecahkan berbagai tantangan cyber security & hacking bergengsi.",
-        image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop",
         icon: <Shield size={20} className="text-[#70C492]" />,
         link: "/lomba/ctf"
       },
@@ -52,7 +60,7 @@ const InteractiveSelector = ({ lombas = [] }) => {
         title: "Desain UI/UX",
         category: "Mahasiswa",
         description: "Rancang antarmuka pengguna yang estetik, intuitif, dan solutif.",
-        image: "https://images.unsplash.com/photo-1581291518655-9523c932ded7?q=80&w=800&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?q=80&w=800&auto=format&fit=crop",
         icon: <Layout size={20} className="text-[#70C492]" />,
         link: "/lomba/desain-ui-ux"
       }
@@ -65,11 +73,12 @@ const InteractiveSelector = ({ lombas = [] }) => {
     return defaultOptions.map(opt => {
       const dbLomba = lombas.find(l => l.slug === opt.slug);
       if (dbLomba) {
+        const cleanDesc = stripHtml(dbLomba.deskripsi);
         return {
           ...opt,
           id: dbLomba.id,
           title: dbLomba.nama || opt.title,
-          description: dbLomba.deskripsi ? (dbLomba.deskripsi.substring(0, 70) + '...') : opt.description,
+          description: cleanDesc ? (cleanDesc.substring(0, 70) + '...') : opt.description,
           image: dbLomba.banner_url || opt.image,
           link: `/lomba/${dbLomba.slug}`
         };

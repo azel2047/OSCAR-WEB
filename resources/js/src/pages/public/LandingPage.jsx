@@ -434,40 +434,28 @@ export default function LandingPage() {
                 transition: { type: "spring", damping: 30, stiffness: 400 },
               }}
               onClick={() => {
-  if (bookletUrl) {
-    let isSameOrigin = false;
-    // Tambahkan timestamp agar browser selalu mengambil file paling baru dari server
-    const separator = bookletUrl.includes('?') ? '&' : '?';
-    const freshBookletUrl = `${bookletUrl}${separator}t=${new Date().getTime()}`;
-
-    try {
-      const urlObj = new URL(freshBookletUrl, window.location.origin);
-      isSameOrigin = urlObj.origin === window.location.origin;
-    } catch (e) {}
-
-    if (isSameOrigin) {
-      const link = document.createElement('a');
-      link.href = freshBookletUrl;
-      link.setAttribute('download', 'Booklet_OSCAR_3.0.pdf');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      window.open(freshBookletUrl, '_blank');
-    }
-  } else {
-    // Jika masuk ke sini, artinya state bookletUrl dari database/API belum masuk ke komponen ini
-    console.warn("Peringatan: bookletUrl kosong, mengunduh file aset bawaan.");
-    const link = document.createElement('a');
-    link.href = `/booklet-oscar3.pdf?t=${new Date().getTime()}`;
-    link.setAttribute('download', 'Booklet_OSCAR_3.0.pdf');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-}}
+                if (bookletUrl) {
+                  if (bookletUrl.startsWith('http')) {
+                    window.open(bookletUrl, '_blank');
+                  } else {
+                    const link = document.createElement('a');
+                    link.href = bookletUrl;
+                    link.setAttribute('download', '');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }
+                } else {
+                  const link = document.createElement('a');
+                  link.href = '/Booklet_OSCAR_3.0.pdf';
+                  link.setAttribute('download', 'Booklet_OSCAR_3.0.pdf');
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }
+              }}
             >
-              Download Booklet <Download size={15} />
+              Download Buku Panduan <Download size={15} />
             </motion.button>
           </div>
 
@@ -672,7 +660,7 @@ export default function LandingPage() {
         
         <div className="flex flex-col gap-3 mb-12">
           <span className="font-mono text-[#70C492] text-[14px] tracking-widest font-extrabold uppercase">
-            DIES NATALIS 3 HIMA TI
+            DIES NATALIS 10 HIMA TI
           </span>
           <h2 className="font-cyber font-black uppercase text-white tracking-tight text-3xl sm:text-4xl leading-none">
             Akar dari <span className="text-[#70C492]">Keunggulan</span>
@@ -689,7 +677,7 @@ export default function LandingPage() {
                 apa itu oscar?
               </span>
               <p className="text-white/60 text-md leading-relaxed text-center font-body">
-                Dalam rangka memperingati Dies Natalis Himpunan Mahasiswa Teknik Informatika (HIMA TI) ke-3 dengan bangga mempersembahkan gelaran perlombaan yang diberi nama OSCAR (Olimpiade Sains Dan Teknologi Terpadu). Gelaran yang memiliki tumbuh cahaya baru, menciptakan sebuah wadah untuk mengeksplorasi kemampuan dan semangat untuk berinovasi secara optimal.
+                Dalam rangka memperingati Dies Natalis mdmpunan Mahasiswa Teknik Informatika (HIMA TI) ke-10 dengan bangga mempersembahkan gelaran perlombaan yang diberi nama OSCAR (Olimpiade Sains Dan Teknologi Terpadu). Gelaran yang memiliki tumbuh cahaya baru, menciptakan sebuah wadah untuk mengeksplorasi kemampuan dan semangat untuk berinovasi secara optimal.
               </p>
             </div>
 

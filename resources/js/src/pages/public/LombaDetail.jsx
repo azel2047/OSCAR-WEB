@@ -141,7 +141,7 @@ export default function LombaDetail() {
                 <h1 className="font-display text-3xl lg:text-5xl font-black text-white mb-4 leading-tight uppercase tracking-tight">
                   {lombaDetail.nama}
                 </h1>
-                <p className="text-[#7A9A8A] leading-relaxed">{lombaDetail.deskripsi}</p>
+                <div className="text-[#7A9A8A] leading-relaxed [&_p]:mb-2 [&_strong]:text-white/80 [&_strong]:font-semibold" dangerouslySetInnerHTML={{ __html: lombaDetail.deskripsi }} />
               </div>
             </div>
 
