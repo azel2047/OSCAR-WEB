@@ -1,0 +1,239 @@
+# =============================================================================
+# OSCAR 3.0 — CI/CD Pipeline
+# Trigger : push ke branch `prod`
+# Flow    : Build image → Push ke GHCR → Deploy ke VPS via SSH
+# =============================================================================
+#
+# GitHub Secrets yang diperlukan (Settings → Secrets → Actions):
+# ┌─────────────────────────┬──────────────────────────────────────────────┐
+# │ Secret Name             │ Nilai                                        │
+# ├─────────────────────────┼──────────────────────────────────────────────┤
+# │ SSH_HOST                │ IP atau hostname VPS                         │
+# │ VPS_USER                │ Username SSH (contoh: ubuntu, root)          │
+# │ VPS_SSH_KEY             │ Isi file private key (~/.ssh/id_rsa)         │
+# │ SSH_PORT                │ Port SSH (default: 22)                       │
+# │ DEPLOY_PATH             │ Path project di server (/var/www/oscar-web)  │
+# │ GHCR_PAT                │ GitHub Personal Access Token (write:packages)│
+# │ ENV_PRODUCTION          │ Seluruh isi file .env.production             │
+# └─────────────────────────┴──────────────────────────────────────────────┘
+# =============================================================================
+
+name: 🚀 Build & Deploy OSCAR 3.0
+
+on:
+  push:
+    branches:
+      - prod
+  workflow_dispatch:          # Bisa trigger manual dari GitHub UI
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: kompetisi-oscar/oscar-web
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JOB 1: Build Docker image & push ke GHCR
+  # ═══════════════════════════════════════════════════════════════════════════
+  build-and-push:
+    name: 🔨 Build & Push Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write       # Diperlukan untuk push ke GHCR
+
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔑 Login ke GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: 🏷️ Extract metadata (tags & labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            # Tag latest untuk branch prod
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/prod' }}
+            # Tag dengan SHA commit pendek untuk rollback
+            type=sha,prefix=sha-,format=short
+            # Tag dengan tanggal deploy
+            type=raw,value={{date 'YYYYMMDD-HHmmss'}},enable=${{ github.ref == 'refs/heads/prod' }}
+
+      - name: 🏗️ Build & Push Docker image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          dockerfile: Dockerfile
+          target: production
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Cache layers dari GHCR untuk mempercepat build berikutnya
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          provenance: false
+
+      - name: 📋 Print image info
+        run: |
+          echo "✅ Image berhasil di-push!"
+          echo "📦 Tags: ${{ steps.meta.outputs.tags }}"
+          echo "🔑 Digest: ${{ steps.build.outputs.digest }}"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JOB 2: Deploy ke VPS via SSH
+  # ═══════════════════════════════════════════════════════════════════════════
+  deploy:
+    name: 🚢 Deploy ke Production
+    runs-on: ubuntu-latest
+    needs: build-and-push        # Hanya jalan jika build berhasil
+    environment: production      # Pakai GitHub Environments untuk approval (opsional)
+
+    steps:
+      - name: 📥 Checkout (untuk docker-compose.prod.yml)
+        uses: actions/checkout@v4
+
+      - name: 📤 Copy docker-compose ke server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "docker-compose.prod.yml"
+          target: ${{ secrets.DEPLOY_PATH }}
+          overwrite: true
+
+      - name: 🔐 Deploy .env.production ke server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            mkdir -p ${{ secrets.DEPLOY_PATH }}
+            cat > ${{ secrets.DEPLOY_PATH }}/.env.production << 'ENV_EOF'
+            ${{ secrets.ENV_PRODUCTION }}
+            ENV_EOF
+            chmod 600 ${{ secrets.DEPLOY_PATH }}/.env.production
+            echo "✅ .env.production berhasil ditulis"
+
+      - name: 🔒 Deploy SSL Certificate ke server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            mkdir -p ${{ secrets.DEPLOY_PATH }}/ssl
+            chmod 700 ${{ secrets.DEPLOY_PATH }}/ssl
+
+            # Tulis certificate
+            cat > ${{ secrets.DEPLOY_PATH }}/ssl/origin.crt << 'CERT_EOF'
+            ${{ secrets.SSL_CERTIFICATE }}
+            CERT_EOF
+            chmod 644 ${{ secrets.DEPLOY_PATH }}/ssl/origin.crt
+
+            # Tulis private key
+            cat > ${{ secrets.DEPLOY_PATH }}/ssl/origin.key << 'KEY_EOF'
+            ${{ secrets.SSL_PRIVATE_KEY }}
+            KEY_EOF
+            chmod 600 ${{ secrets.DEPLOY_PATH }}/ssl/origin.key
+
+            echo "✅ SSL certificate berhasil ditulis"
+
+      - name: 🚀 Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            set -e
+
+            echo "═══════════════════════════════════════"
+            echo "  OSCAR 3.0 — Production Deployment"
+            echo "  Commit: ${{ github.sha }}"
+            echo "═══════════════════════════════════════"
+
+            cd ${{ secrets.DEPLOY_PATH }}
+
+            # Login ke GHCR menggunakan GHCR_PAT
+            echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io \
+              -u ${{ github.actor }} \
+              --password-stdin
+
+            # Pull image terbaru dari GHCR
+            echo "→ Pulling latest image..."
+            docker compose -f docker-compose.prod.yml pull
+
+            # Rolling update: jalankan container baru, hapus yang lama
+            echo "→ Starting new container..."
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+            # Tunggu container sehat
+            echo "→ Waiting for health check..."
+            sleep 15
+
+            # Verifikasi container berjalan
+            docker compose -f docker-compose.prod.yml ps
+
+            echo "→ Nginx Config Test:"
+            docker compose -f docker-compose.prod.yml exec -T app nginx -t || true
+
+            echo "→ Container Logs:"
+            docker compose -f docker-compose.prod.yml logs --tail=100 app || true
+
+            # Bersihkan image lama yang tidak terpakai
+            echo "→ Cleaning up old images..."
+            docker image prune -f --filter "until=24h"
+
+            echo "✅ Deployment selesai!"
+
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JOB 3: Notifikasi hasil deployment
+  # ═══════════════════════════════════════════════════════════════════════════
+  notify:
+    name: 📣 Notifikasi
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy]
+    if: always()    # Selalu jalan meski job sebelumnya gagal
+
+    steps:
+      - name: ✅ Notifikasi Sukses
+        if: needs.deploy.result == 'success'
+        run: |
+          echo "🎉 Deployment OSCAR 3.0 berhasil!"
+          echo "Branch  : ${{ github.ref_name }}"
+          echo "Commit  : ${{ github.sha }}"
+          echo "By      : ${{ github.actor }}"
+          echo "Image   : ghcr.io/${{ github.repository }}:latest"
+          # Tambahkan webhook Discord/Slack di sini jika diperlukan
+
+      - name: ❌ Notifikasi Gagal
+        if: needs.deploy.result == 'failure' || needs.build-and-push.result == 'failure'
+        run: |
+          echo "💥 Deployment OSCAR 3.0 GAGAL!"
+          echo "Branch  : ${{ github.ref_name }}"
+          echo "Commit  : ${{ github.sha }}"
+          echo "By      : ${{ github.actor }}"
+          echo "Cek logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          # Tambahkan webhook Discord/Slack di sini jika diperlukan
+          exit 1
