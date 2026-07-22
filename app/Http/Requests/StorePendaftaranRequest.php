@@ -14,13 +14,15 @@ class StorePendaftaranRequest extends FormRequest
 
     public function rules(): array
     {
+        $lomba = Lomba::find($this->lomba_id);
+        $isCTF = $lomba && ($lomba->slug === 'ctf' || str_contains(strtolower($lomba->nama), 'ctf'));
+
         $rules = [
             'lomba_id'       => 'required|exists:lomba,id',
             'no_wa'          => ['required', 'regex:/^(\+62|62|0)8[0-9]{8,11}$/'],
             'email'          => 'required|email',
-            'tema'           => 'required|string|max:100',
+            'tema'           => $isCTF ? 'nullable|string|max:100' : 'required|string|max:100',
             'bukti_transfer' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-
         ];
 
         // Validasi dinamis untuk syarat berkas

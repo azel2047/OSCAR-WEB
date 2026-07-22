@@ -191,7 +191,7 @@ export default function FormDaftarPage() {
     fd.append('lomba_id', formData.lomba_id);
     fd.append('email', formData.email);
     fd.append('no_wa', formData.no_wa);
-    fd.append('tema', formData.tema);
+    fd.append('tema', isCTF ? (formData.tema || '-') : formData.tema);
 
     if (isWebDev) {
       fd.append('asal_sekolah', formData.asal_sekolah);
@@ -613,22 +613,24 @@ export default function FormDaftarPage() {
               )}
             </div>
 
-            <div className="space-y-1.5">
-              <label className="font-display text-[12px] font-bold tracking-widest uppercase text-[#8B9A7A]">TEMA LOMBA YANG DIIKUTI</label>
-              <Input
-                as="select"
-                name="tema"
-                value={formData.tema}
-                onChange={handleTextChange}
-                className={INPUT_CLASS}
-                required
-              >
-                <option value="" className="bg-[#0A1A0A] text-[#8B9A7A]">-- Pilih Tema Lomba --</option>
-                {getTemaOptions(selectedLomba).map((option) => (
-                  <option key={option} value={option} className="bg-[#0D1E0D] text-white">{option}</option>
-                ))}
-              </Input>
-            </div>
+            {!isCTF && (
+              <div className="space-y-1.5">
+                <label className="font-display text-[12px] font-bold tracking-widest uppercase text-[#8B9A7A]">TEMA LOMBA YANG DIIKUTI</label>
+                <Input
+                  as="select"
+                  name="tema"
+                  value={formData.tema}
+                  onChange={handleTextChange}
+                  className={INPUT_CLASS}
+                  required
+                >
+                  <option value="" className="bg-[#0A1A0A] text-[#8B9A7A]">-- Pilih Tema Lomba --</option>
+                  {getTemaOptions(selectedLomba).map((option) => (
+                    <option key={option} value={option} className="bg-[#0D1E0D] text-white">{option}</option>
+                  ))}
+                </Input>
+              </div>
+            )}
 
             {/* Navigation buttons */}
             <div className="flex items-center justify-between pt-4 border-t border-white/[0.04]">
@@ -642,7 +644,7 @@ export default function FormDaftarPage() {
               </Button>
               <Button
                 variant="solid"
-                disabled={!formData.nama_peserta_1 || !formData.no_wa || !formData.tema || (isWebDev && ((showAnggota2 && !formData.nama_peserta_2) || !formData.nama_pendamping || !formData.no_wa_pendamping))}
+                disabled={!formData.nama_peserta_1 || !formData.no_wa || (!isCTF && !formData.tema) || (isWebDev && ((showAnggota2 && !formData.nama_peserta_2) || !formData.nama_pendamping || !formData.no_wa_pendamping))}
                 onClick={() => setStep(3)}
                 className="bg-[#00ffc8] hover:bg-[#00e6b5] text-[#020a06] font-bold rounded-xl px-6.5 py-3.5 flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,255,200,0.2)] transition-all font-mono"
               >
