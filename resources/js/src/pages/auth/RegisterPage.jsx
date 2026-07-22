@@ -68,8 +68,9 @@ export default function RegisterPage() {
 
   const validate = () => {
     const e = {};
-    if (!form.nama)          e.nama     = 'Nama lengkap wajib diisi';
-    if (!form.email)         e.email    = 'Email wajib diisi';
+    if (!form.nama)          e.nama      = 'Nama lengkap wajib diisi';
+    if (!form.email)         e.email     = 'Email wajib diisi';
+    if (!form.no_hp)         e.no_hp     = 'Nomor HP / WhatsApp wajib diisi';
     if (!form.institusi)     e.institusi = 'Nama institusi wajib diisi';
     if (!form.kategori)      e.kategori  = 'Pilih kategori peserta';
     if (form.password.length < 8) e.password = 'Password minimal 8 karakter';
@@ -161,7 +162,7 @@ export default function RegisterPage() {
                   placeholder="+6285"
                   leftIcon={<Phone size={16} className="text-[#70C492]" />}
                   value={form.no_hp} onChange={handleChange}
-                  className={INPUT_CLASS}
+                  error={errors.no_hp} className={INPUT_CLASS} required
                 />
               </div>
               

@@ -22,11 +22,13 @@ class AuthController extends Controller
     public function register(RegisterRequest $request)
     {
         $user = User::create([
-            'nama'     => $request->nama,
-            'email'    => $request->email,
-            'password' => $request->password,
-            'role'     => 'peserta',
-            'kategori' => $request->kategori,
+            'nama'      => $request->nama,
+            'email'     => $request->email,
+            'password'  => $request->password,
+            'role'      => 'peserta',
+            'kategori'  => $request->kategori,
+            'no_hp'     => $request->no_hp,
+            'institusi' => $request->institusi,
         ]);
         $token = $user->createToken('oscar-token')->plainTextToken;
 
